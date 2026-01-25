@@ -122,7 +122,6 @@ export default function LoginPage() {
 
           <div className="mt-6 text-sm text-center text-gray-500 dark:text-gray-400">
             <p>Log in with your username and password</p>
-            <p className="mt-2">Admin: admin / bosslevel</p>
             <p className="mt-2 text-xs">
               Need an account? Contact an administrator for an invite link.
             </p>
