@@ -95,6 +95,16 @@ export async function initDatabase() {
   `);
 
   await db.execute(`
+    CREATE TABLE IF NOT EXISTS password_reset_tokens (
+      token TEXT PRIMARY KEY,
+      username TEXT NOT NULL,
+      created_at INTEGER,
+      expires_at INTEGER,
+      used INTEGER DEFAULT 0
+    )
+  `);
+
+  await db.execute(`
     CREATE TABLE IF NOT EXISTS bet_results (
       bet_id TEXT PRIMARY KEY,
       result TEXT NOT NULL,

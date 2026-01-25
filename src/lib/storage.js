@@ -306,6 +306,53 @@ export async function deleteUser(username) {
 }
 
 /**
+ * Generate a password reset token
+ */
+export async function generatePasswordResetToken(username) {
+  if (!username) {
+    return { success: false, error: 'Username is required' };
+  }
+  try {
+    const result = await dbCall('generatePasswordResetToken', { username });
+    return result;
+  } catch (e) {
+    console.error('Failed to generate password reset token:', e);
+    return { success: false, error: 'Failed to generate reset token' };
+  }
+}
+
+/**
+ * Get password reset token details
+ */
+export async function getPasswordResetToken(token) {
+  if (!token) {
+    return null;
+  }
+  try {
+    return await dbCall('getPasswordResetToken', { token });
+  } catch (e) {
+    console.error('Failed to get password reset token:', e);
+    return null;
+  }
+}
+
+/**
+ * Reset password using a reset token
+ */
+export async function resetPassword(token, newPassword) {
+  if (!token || !newPassword) {
+    return { success: false, error: 'Token and new password are required' };
+  }
+  try {
+    const result = await dbCall('resetPassword', { token, newPassword });
+    return result;
+  } catch (e) {
+    console.error('Failed to reset password:', e);
+    return { success: false, error: 'Failed to reset password' };
+  }
+}
+
+/**
  * Get all bet results
  */
 export async function getBetResults() {

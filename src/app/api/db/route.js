@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getDbClient, initDatabase } from '../../../lib/db';
+import bcrypt from 'bcryptjs';
 
 // Initialize database on first import
 let dbInitialized = false;
@@ -300,11 +301,13 @@ export async function POST(request) {
         if (existing.rows.length > 0) {
           return NextResponse.json({ success: false, error: 'Username already exists' });
         }
+        // Hash the password using bcrypt
+        const hashedPassword = await bcrypt.hash(password, 10);
         const now = Math.floor(Date.now() / 1000);
         await db.execute(`
           INSERT INTO user_credentials (username, password, created_at, created_via)
           VALUES (?, ?, ?, ?)
-        `, [username, password, now, inviteToken || null]);
+        `, [username, hashedPassword, now, inviteToken || null]);
         return NextResponse.json({ success: true });
       }
 
@@ -314,7 +317,122 @@ export async function POST(request) {
         if (result.rows.length === 0) {
           return NextResponse.json(false);
         }
-        return NextResponse.json(result.rows[0].password === password);
+        const storedPassword = result.rows[0].password;
+        
+        // Check if password is hashed (bcrypt hashes start with $2a$ or $2b$)
+        const isHashed = storedPassword.startsWith('$2a$') || storedPassword.startsWith('$2b$') || storedPassword.startsWith('$2y$');
+        
+        if (isHashed) {
+          // New format: compare using bcrypt
+          const isValid = await bcrypt.compare(password, storedPassword);
+          return NextResponse.json(isValid);
+        } else {
+          // Old format: plain text comparison (backward compatibility)
+          return NextResponse.json(storedPassword === password);
+        }
+      }
+
+      case 'generatePasswordResetToken': {
+        const { username } = params;
+        if (!username) {
+          return NextResponse.json({ success: false, error: 'Username is required' }, { status: 400 });
+        }
+        
+        // Check if user exists
+        const userResult = await db.execute('SELECT username FROM user_credentials WHERE username = ?', [username]);
+        if (userResult.rows.length === 0) {
+          // Don't reveal if user exists or not (security best practice)
+          return NextResponse.json({ success: true, token: null });
+        }
+        
+        // Generate reset token
+        const token = `reset-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
+        const now = Math.floor(Date.now() / 1000);
+        const expiresAt = now + (24 * 60 * 60); // 24 hours from now
+        
+        // Delete any existing reset tokens for this user
+        await db.execute('DELETE FROM password_reset_tokens WHERE username = ?', [username]);
+        
+        // Insert new reset token
+        await db.execute(`
+          INSERT INTO password_reset_tokens (token, username, created_at, expires_at)
+          VALUES (?, ?, ?, ?)
+        `, [token, username, now, expiresAt]);
+        
+        return NextResponse.json({ success: true, token });
+      }
+
+      case 'getPasswordResetToken': {
+        const { token } = params;
+        if (!token) {
+          return NextResponse.json(null);
+        }
+        
+        const result = await db.execute(
+          'SELECT * FROM password_reset_tokens WHERE token = ?',
+          [token]
+        );
+        
+        if (result.rows.length === 0) {
+          return NextResponse.json(null);
+        }
+        
+        const row = result.rows[0];
+        const now = Math.floor(Date.now() / 1000);
+        
+        // Check if token is expired or used
+        if (row.expires_at < now || row.used === 1) {
+          return NextResponse.json(null);
+        }
+        
+        return NextResponse.json({
+          token: row.token,
+          username: row.username,
+          createdAt: row.created_at * 1000,
+          expiresAt: row.expires_at * 1000
+        });
+      }
+
+      case 'resetPassword': {
+        const { token, newPassword } = params;
+        if (!token || !newPassword) {
+          return NextResponse.json({ success: false, error: 'Token and new password are required' }, { status: 400 });
+        }
+        
+        // Get reset token
+        const tokenResult = await db.execute(
+          'SELECT * FROM password_reset_tokens WHERE token = ?',
+          [token]
+        );
+        
+        if (tokenResult.rows.length === 0) {
+          return NextResponse.json({ success: false, error: 'Invalid or expired reset token' }, { status: 400 });
+        }
+        
+        const resetToken = tokenResult.rows[0];
+        const now = Math.floor(Date.now() / 1000);
+        
+        // Check if token is expired or used
+        if (resetToken.expires_at < now || resetToken.used === 1) {
+          return NextResponse.json({ success: false, error: 'Invalid or expired reset token' }, { status: 400 });
+        }
+        
+        // Hash the new password
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        
+        // Update user's password
+        await db.execute(
+          'UPDATE user_credentials SET password = ? WHERE username = ?',
+          [hashedPassword, resetToken.username]
+        );
+        
+        // Mark token as used
+        await db.execute(
+          'UPDATE password_reset_tokens SET used = 1 WHERE token = ?',
+          [token]
+        );
+        
+        return NextResponse.json({ success: true });
       }
 
       case 'deleteUser': {

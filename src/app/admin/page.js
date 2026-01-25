@@ -111,9 +111,39 @@ export default function AdminDashboard() {
 
           {/* Stats Panel */}
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              Statistics
-            </h2>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Statistics
+              </h2>
+              <button
+                onClick={async () => {
+                  const password = prompt('Enter admin password to migrate existing passwords to hashed format:');
+                  if (!password) return;
+                  
+                  if (confirm('This will hash all existing plain text passwords. Continue?')) {
+                    try {
+                      const response = await fetch('/api/migrate-passwords', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ adminPassword: password })
+                      });
+                      const result = await response.json();
+                      if (result.success) {
+                        alert(`Migration complete!\nMigrated: ${result.migrated}\nSkipped: ${result.skipped}`);
+                      } else {
+                        alert(`Migration failed: ${result.error || 'Unknown error'}`);
+                      }
+                    } catch (error) {
+                      alert(`Error: ${error.message}`);
+                    }
+                  }
+                }}
+                className="px-3 py-1 text-xs bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300 rounded hover:bg-yellow-200 dark:hover:bg-yellow-800"
+                title="Hash existing plain text passwords"
+              >
+                Migrate Passwords
+              </button>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
               <div className="text-center sm:text-left">
                 <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">

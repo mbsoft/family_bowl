@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { login, isAuthenticated } from '../../lib/auth';
 
 export default function LoginPage() {
@@ -13,11 +14,14 @@ export default function LoginPage() {
   const [registered, setRegistered] = useState(false);
 
   useEffect(() => {
-    // Check if user just registered
+    // Check if user just registered or reset password
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       if (params.get('registered') === 'true') {
         setRegistered(true);
+      }
+      if (params.get('reset') === 'success') {
+        setRegistered(true); // Reuse the registered state to show success
       }
     }
 
@@ -78,7 +82,9 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             {registered && (
               <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 px-4 py-3 rounded">
-                Account created successfully! Please log in with your credentials.
+                {typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('reset') === 'success'
+                  ? 'Password reset successfully! Please log in with your new password.'
+                  : 'Account created successfully! Please log in with your credentials.'}
               </div>
             )}
             {error && (
@@ -137,6 +143,12 @@ export default function LoginPage() {
             <p className="mt-2 text-xs">
               Need an account? Contact an administrator for an invite link.
             </p>
+            <Link
+              href="/forgot-password"
+              className="mt-4 block text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+            >
+              Forgot Password?
+            </Link>
           </div>
         </div>
       </div>
