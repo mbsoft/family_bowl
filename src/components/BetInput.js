@@ -7,7 +7,7 @@ import { getBetTypes } from '../lib/storage';
 /**
  * BetInput component - renders different input types based on bet type
  */
-export default function BetInput({ bet, value, onChange, disabled = false }) {
+export default function BetInput({ bet, value, onChange, disabled = false, showLabel = true }) {
   const [betTypes, setBetTypes] = useState([]);
 
   useEffect(() => {
@@ -51,17 +51,24 @@ export default function BetInput({ bet, value, onChange, disabled = false }) {
   };
 
   return (
-    <div className="mb-6">
-      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-        {bet.question}
-        {isIntegerRange && betTypeDef && (
-          <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">
-            (Range: {betTypeDef.minValue} - {betTypeDef.maxValue})
-          </span>
-        )}
-      </label>
+    <div>
+      {showLabel && (
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+          {bet.question}
+          {isIntegerRange && betTypeDef && (
+            <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">
+              (Range: {betTypeDef.minValue} - {betTypeDef.maxValue})
+            </span>
+          )}
+        </label>
+      )}
       {isIntegerRange ? (
         <div>
+          {!showLabel && betTypeDef && (
+            <span className="block text-xs text-gray-500 dark:text-gray-400 mb-2">
+              Range: {betTypeDef.minValue} - {betTypeDef.maxValue}
+            </span>
+          )}
           <input
             type="number"
             value={value || ''}

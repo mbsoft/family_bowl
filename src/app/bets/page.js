@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { isAuthenticated, getCurrentUsername } from '../../lib/auth';
-import { getBets } from '../../lib/storage';
+import { getBets, getBetTypes } from '../../lib/storage';
 import { getSubmission, saveSubmission, arePicksLocked } from '../../lib/storage';
 import { DEFAULT_BETS } from '../../utils/constants';
 import BetInput from '../../components/BetInput';
@@ -18,6 +18,7 @@ export default function BetsPage() {
   const [submitted, setSubmitted] = useState(false);
   const [username, setUsername] = useState(null);
   const [picksLocked, setPicksLocked] = useState(false);
+  const [betTypes, setBetTypes] = useState([]);
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -36,14 +37,16 @@ export default function BetsPage() {
     // Load data asynchronously
     const loadData = async () => {
       try {
-        // Load bets, picks lock status, and submission in parallel
-        const [loadedBets, locked, existingSubmission] = await Promise.all([
+        // Load bets, picks lock status, submission, and bet types in parallel
+        const [loadedBets, locked, existingSubmission, types] = await Promise.all([
           getBets(),
           arePicksLocked(),
-          currentUser ? getSubmission(currentUser) : Promise.resolve(null)
+          currentUser ? getSubmission(currentUser) : Promise.resolve(null),
+          getBetTypes()
         ]);
 
         setPicksLocked(locked);
+        setBetTypes(types || []);
 
         // Use loaded bets or defaults
         const betsToUse = loadedBets && loadedBets.length > 0 ? loadedBets : DEFAULT_BETS;
@@ -57,6 +60,7 @@ export default function BetsPage() {
         console.error('Failed to load data:', error);
         // Fallback to defaults on error
         setBets(DEFAULT_BETS);
+        setBetTypes([]);
       } finally {
         setLoading(false);
       }
@@ -134,7 +138,7 @@ export default function BetsPage() {
                 />
                 <div className="flex-1">
                   <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                    Super Bowl Prop Bets
+                    {process.env.NEXT_PUBLIC_APP_TITLE || 'Super Bowl Prop Bets'}
                   </h1>
                   <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
                     Welcome, {username}! Make your selections below.
@@ -198,16 +202,37 @@ export default function BetsPage() {
             </div>
           ) : (
             <form onSubmit={handleSubmit}>
-              <div className={`space-y-6 ${picksLocked ? 'opacity-60 pointer-events-none' : ''}`}>
-                {bets.map((bet) => (
-                  <BetInput
-                    key={bet.id}
-                    bet={bet}
-                    value={selections[bet.id] || ''}
-                    onChange={handleSelectionChange}
-                    disabled={picksLocked}
-                  />
-                ))}
+              <div className={`space-y-4 sm:space-y-6 ${picksLocked ? 'opacity-60 pointer-events-none' : ''}`}>
+                {bets.map((bet) => {
+                  const betTypeDef = betTypes.find(bt => bt.id === bet.type);
+                  const isIntegerRange = betTypeDef?.isIntegerRange || false;
+                  
+                  return (
+                    <div key={bet.id} className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 items-start pb-4 md:pb-6 border-b border-gray-200 dark:border-gray-700 last:border-b-0">
+                      {/* Left Column: Bet Question */}
+                      <div className="md:pr-4">
+                        <label className="block text-base sm:text-lg font-medium text-gray-700 dark:text-gray-300">
+                          {bet.question}
+                        </label>
+                        {isIntegerRange && betTypeDef && (
+                          <span className="block text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">
+                            Range: {betTypeDef.minValue} - {betTypeDef.maxValue}
+                          </span>
+                        )}
+                      </div>
+                      {/* Right Column: Response Input */}
+                      <div className="md:pl-4">
+                        <BetInput
+                          bet={bet}
+                          value={selections[bet.id] || ''}
+                          onChange={handleSelectionChange}
+                          disabled={picksLocked}
+                          showLabel={false}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
 
               <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
