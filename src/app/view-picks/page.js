@@ -141,6 +141,76 @@ export default function ViewPicksPage() {
     return String(userSelection).trim() === String(result).trim();
   };
 
+  // Determine the winner
+  const determineWinner = () => {
+    // Only determine winner if bets are locked and all results are defined
+    if (!picksLocked) return null;
+    
+    // Check if all bets have results
+    const allBetsHaveResults = bets.length > 0 && bets.every(bet => results[bet.id]);
+    if (!allBetsHaveResults) return null;
+
+    // Calculate points for each user
+    const userPoints = sortedSubmissions.map(submission => ({
+      username: submission.username,
+      points: calculatePoints(submission.username)
+    }));
+
+    // Find the maximum points
+    const maxPoints = Math.max(...userPoints.map(u => u.points));
+    
+    // Find all users with max points
+    const topUsers = userPoints.filter(u => u.points === maxPoints);
+
+    // If only one winner, return it
+    if (topUsers.length === 1) {
+      return topUsers[0].username;
+    }
+
+    // Tie-breaker logic
+    if (topUsers.length > 1) {
+      // Find the tie breaker bet (question starts with "Tie Breaker")
+      const tieBreakerBet = bets.find(bet => 
+        bet.question.toLowerCase().startsWith('tie breaker')
+      );
+
+      if (!tieBreakerBet || !results[tieBreakerBet.id]) {
+        // No tie breaker or no result, return first user (alphabetical)
+        return topUsers[0].username;
+      }
+
+      const tieBreakerResult = parseInt(results[tieBreakerBet.id], 10);
+      if (isNaN(tieBreakerResult)) {
+        // Tie breaker result is not a number, return first user
+        return topUsers[0].username;
+      }
+
+      // Find the user with the closest answer to the tie breaker result
+      let winner = topUsers[0].username;
+      let closestDiff = Infinity;
+
+      topUsers.forEach(user => {
+        const submission = submissions.find(s => s.username === user.username);
+        if (submission && submission.selections[tieBreakerBet.id]) {
+          const userAnswer = parseInt(submission.selections[tieBreakerBet.id], 10);
+          if (!isNaN(userAnswer)) {
+            const diff = Math.abs(userAnswer - tieBreakerResult);
+            if (diff < closestDiff) {
+              closestDiff = diff;
+              winner = user.username;
+            }
+          }
+        }
+      });
+
+      return winner;
+    }
+
+    return null;
+  };
+
+  const winner = determineWinner();
+
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-black py-8 px-4">
       <div className="max-w-7xl mx-auto">
@@ -186,14 +256,26 @@ export default function ViewPicksPage() {
                     <th className="px-2 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider sticky left-0 bg-gray-50 dark:bg-gray-700 z-30 border-r border-gray-200 dark:border-gray-600 shadow-[2px_0_4px_rgba(0,0,0,0.1)] min-w-[150px] sm:min-w-[200px]">
                       Bet Question
                     </th>
-                    {sortedSubmissions.map((submission) => (
-                      <th
-                        key={submission.username}
-                        className="px-2 sm:px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider min-w-[100px] sm:min-w-[120px]"
-                      >
-                        {submission.username}
-                      </th>
-                    ))}
+                    {sortedSubmissions.map((submission) => {
+                      const isWinner = winner === submission.username;
+                      return (
+                        <th
+                          key={submission.username}
+                          className={`px-2 sm:px-4 py-3 text-center text-xs font-medium uppercase tracking-wider min-w-[100px] sm:min-w-[120px] ${
+                            isWinner
+                              ? 'bg-yellow-200 dark:bg-yellow-800 text-yellow-900 dark:text-yellow-100 font-bold'
+                              : 'text-gray-500 dark:text-gray-300'
+                          }`}
+                        >
+                          {submission.username}
+                          {isWinner && (
+                            <span className="ml-1" title="Winner! 🏆" aria-label="Winner">
+                              🏆
+                            </span>
+                          )}
+                        </th>
+                      );
+                    })}
                   </tr>
                 </thead>
                 <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">

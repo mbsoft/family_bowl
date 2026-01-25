@@ -181,42 +181,73 @@ export default function AdminSubmissionsPage() {
                   {editingSubmission?.username === submission.username ? (
                     <div className="space-y-4">
                       {bets.map((bet) => {
+                        const betTypeDef = betTypes.find(bt => bt.id === bet.type);
+                        const isIntegerRange = betTypeDef?.isIntegerRange || false;
                         const options = getBetOptions(bet.type, bet.teamNames, betTypes);
+                        const currentValue = editingSelections[bet.id] || '';
 
                         return (
                           <div key={bet.id} className="border-b border-gray-200 dark:border-gray-700 pb-4">
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                               {bet.question}
+                              {isIntegerRange && betTypeDef && (
+                                <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">
+                                  (Range: {betTypeDef.minValue} - {betTypeDef.maxValue})
+                                </span>
+                              )}
                             </label>
-                            <div className="flex gap-4">
-                              {options.map((option) => {
-                                const label = getBetOptionLabel(bet.type, option, bet.teamNames, betTypes);
-                                const isSelected = editingSelections[bet.id] === option;
-                                return (
-                                  <label
-                                    key={option}
-                                    className={`
-                                      flex items-center px-3 py-1 rounded cursor-pointer
-                                      ${
-                                        isSelected
-                                          ? 'bg-blue-500 text-white'
-                                          : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                            {isIntegerRange ? (
+                              <div>
+                                <input
+                                  type="number"
+                                  value={currentValue}
+                                  onChange={(e) => {
+                                    const inputValue = e.target.value;
+                                    // Allow empty string for clearing, or valid integer
+                                    if (inputValue === '' || /^\d+$/.test(inputValue)) {
+                                      const numValue = inputValue === '' ? '' : parseInt(inputValue, 10);
+                                      if (inputValue === '' || (numValue >= betTypeDef.minValue && numValue <= betTypeDef.maxValue)) {
+                                        handleSelectionChange(bet.id, inputValue === '' ? '' : String(numValue));
                                       }
-                                    `}
-                                  >
-                                    <input
-                                      type="radio"
-                                      name={`edit-${bet.id}`}
-                                      value={option}
-                                      checked={isSelected}
-                                      onChange={() => handleSelectionChange(bet.id, option)}
-                                      className="sr-only"
-                                    />
-                                    <span className="text-sm">{label}</span>
-                                  </label>
-                                );
-                              })}
-                            </div>
+                                    }
+                                  }}
+                                  min={betTypeDef?.minValue || 0}
+                                  max={betTypeDef?.maxValue || 100}
+                                  placeholder={`Enter a number between ${betTypeDef?.minValue || 0} and ${betTypeDef?.maxValue || 100}`}
+                                  className="w-full max-w-xs px-4 py-2 border-2 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800"
+                                />
+                              </div>
+                            ) : (
+                              <div className="flex gap-4 flex-wrap">
+                                {options.map((option) => {
+                                  const label = getBetOptionLabel(bet.type, option, bet.teamNames, betTypes);
+                                  const isSelected = editingSelections[bet.id] === option;
+                                  return (
+                                    <label
+                                      key={option}
+                                      className={`
+                                        flex items-center px-3 py-1 rounded cursor-pointer
+                                        ${
+                                          isSelected
+                                            ? 'bg-blue-500 text-white'
+                                            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                                        }
+                                      `}
+                                    >
+                                      <input
+                                        type="radio"
+                                        name={`edit-${bet.id}`}
+                                        value={option}
+                                        checked={isSelected}
+                                        onChange={() => handleSelectionChange(bet.id, option)}
+                                        className="sr-only"
+                                      />
+                                      <span className="text-sm">{label}</span>
+                                    </label>
+                                  );
+                                })}
+                              </div>
+                            )}
                           </div>
                         );
                       })}
