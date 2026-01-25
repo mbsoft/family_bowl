@@ -65,7 +65,7 @@ export default function BetInput({ bet, value, onChange, disabled = false, showL
       {isIntegerRange ? (
         <div>
           {!showLabel && betTypeDef && (
-            <span className="block text-xs text-gray-500 dark:text-gray-400 mb-2">
+            <span className="block text-xs font-bold text-gray-600 dark:text-gray-400 mb-2 uppercase">
               Range: {betTypeDef.minValue} - {betTypeDef.maxValue}
             </span>
           )}
@@ -77,17 +77,17 @@ export default function BetInput({ bet, value, onChange, disabled = false, showL
             max={betTypeDef?.maxValue || 100}
             disabled={disabled}
             className={`
-              w-full max-w-xs px-4 py-2 border-2 rounded-lg
+              w-full max-w-xs px-4 py-3 border-3 rounded-xl font-semibold
               ${disabled ? 'cursor-not-allowed opacity-60' : ''}
               bg-white dark:bg-gray-800 text-gray-900 dark:text-white
-              border-gray-300 dark:border-gray-600
-              focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800
+              border-gray-400 dark:border-gray-600
+              focus:border-[#0D4F3C] focus:ring-4 focus:ring-[#0D4F3C]/20 dark:focus:border-green-500 dark:focus:ring-green-500/20
             `}
             placeholder={`Enter a number between ${betTypeDef?.minValue || 0} and ${betTypeDef?.maxValue || 100}`}
           />
         </div>
       ) : (
-        <div className="flex flex-wrap gap-2 sm:gap-4">
+        <div className="flex flex-wrap gap-3">
           {options.map((option) => {
             const optionId = `${bet.id}-${option}`;
             const label = getBetOptionLabel(bet.type, option, bet.teamNames, betTypes);
@@ -98,18 +98,17 @@ export default function BetInput({ bet, value, onChange, disabled = false, showL
                 key={optionId}
                 htmlFor={optionId}
                 className={`
-                  flex items-center px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg border-2 transition-colors text-sm sm:text-base
+                  flex items-center px-5 py-3 rounded-xl border-4 font-bold uppercase tracking-wide transition-all text-sm sm:text-base
                   ${
                     disabled
                       ? 'cursor-not-allowed opacity-60'
-                      : 'cursor-pointer'
+                      : 'cursor-pointer hover:scale-105'
                   }
                   ${
                     isSelected
-                      ? 'bg-blue-500 text-white border-blue-600'
-                      : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:border-blue-400'
+                      ? 'bg-[#0D4F3C] text-white border-[#0D4F3C] dark:bg-green-600 dark:border-green-600 shadow-lg scale-105'
+                      : 'bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border-gray-400 dark:border-gray-600 hover:border-[#0D4F3C] dark:hover:border-green-500'
                   }
-                  ${disabled ? '' : 'hover:border-blue-400'}
                 `}
               >
                 <input
@@ -122,7 +121,7 @@ export default function BetInput({ bet, value, onChange, disabled = false, showL
                   disabled={disabled}
                   className="sr-only"
                 />
-                <span className="font-medium">{label}</span>
+                <span>{label}</span>
               </label>
             );
           })}

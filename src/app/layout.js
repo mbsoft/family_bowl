@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Super Bowl Prop Bet Tracker",
+  title: process.env.NEXT_PUBLIC_APP_TITLE || "Super Bowl Prop Bet Tracker",
   description: "Track and manage Super Bowl prop bet selections",
 };
 

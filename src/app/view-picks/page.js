@@ -212,7 +212,7 @@ export default function ViewPicksPage() {
   const winner = determineWinner();
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-black py-8 px-4">
+    <div className="min-h-screen bg-[#F5F5F5] dark:bg-[#1A1A1A] py-8 px-4">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-4">
@@ -220,13 +220,13 @@ export default function ViewPicksPage() {
                 <img 
                   src="/logo.webp" 
                   alt="Family Bowl Logo" 
-                  className="h-10 sm:h-12 w-auto flex-shrink-0"
+                  className="h-10 sm:h-12 w-auto flex-shrink-0 drop-shadow-lg"
                 />
                 <div>
-                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                  <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white mb-2 uppercase tracking-tight">
                     All Picks
                   </h1>
-                  <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
+                  <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300 font-semibold">
                     {picksLocked 
                       ? "View everyone's selections (picks are locked)"
                       : "View everyone's selections"}
@@ -236,13 +236,13 @@ export default function ViewPicksPage() {
               <div className="flex flex-col sm:flex-row gap-2">
                 <button
                   onClick={() => loadData()}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium"
+                  className="px-5 py-3 bg-gradient-to-r from-[#0D4F3C] to-green-700 hover:from-green-700 hover:to-green-800 dark:from-green-600 dark:to-green-700 text-white rounded-xl text-sm font-black uppercase tracking-wider shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
                 >
                   Refresh
                 </button>
                 <button
                   onClick={() => router.push(isAdmin() ? '/admin' : '/bets')}
-                  className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg text-sm font-medium border border-gray-300 dark:border-gray-600"
+                  className="px-5 py-3 text-gray-700 dark:text-gray-300 hover:text-[#0D4F3C] dark:hover:text-green-400 rounded-xl text-sm font-black uppercase tracking-wider border-4 border-gray-400 dark:border-gray-600 hover:border-[#0D4F3C] dark:hover:border-green-500 transition-all"
                 >
                   {isAdmin() ? 'Back to Admin' : 'Back to My Picks'}
                 </button>
@@ -251,16 +251,16 @@ export default function ViewPicksPage() {
         </div>
 
         {sortedSubmissions.length === 0 ? (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 text-center text-gray-600 dark:text-gray-400">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border-4 border-[#0D4F3C] dark:border-green-600 p-8 text-center text-gray-700 dark:text-gray-300 font-bold">
             <p>No submissions yet.</p>
           </div>
         ) : (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border-4 border-[#0D4F3C] dark:border-green-600 overflow-hidden">
             <div className="overflow-x-auto max-h-[calc(100vh-250px)]">
               <table className="w-full min-w-full">
-                <thead className="bg-gray-50 dark:bg-gray-700 sticky top-0 z-20">
+                <thead className="bg-[#0D4F3C] dark:bg-green-700 sticky top-0 z-20">
                   <tr>
-                    <th className="px-2 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider sticky left-0 bg-gray-50 dark:bg-gray-700 z-30 border-r border-gray-200 dark:border-gray-600 shadow-[2px_0_4px_rgba(0,0,0,0.1)] min-w-[150px] sm:min-w-[200px]">
+                    <th className="px-2 sm:px-4 py-3 text-left text-xs font-black text-white uppercase tracking-wider sticky left-0 bg-[#0D4F3C] dark:bg-green-700 z-30 border-r-4 border-green-600 dark:border-green-500 shadow-[2px_0_4px_rgba(0,0,0,0.1)] min-w-[150px] sm:min-w-[200px]">
                       Bet Question
                     </th>
                     {sortedSubmissions.map((submission) => {
@@ -268,10 +268,10 @@ export default function ViewPicksPage() {
                       return (
                         <th
                           key={submission.username}
-                          className={`px-2 sm:px-4 py-3 text-center text-xs font-medium uppercase tracking-wider min-w-[100px] sm:min-w-[120px] ${
+                          className={`px-2 sm:px-4 py-3 text-center text-xs font-black uppercase tracking-wider min-w-[100px] sm:min-w-[120px] ${
                             isWinner
-                              ? 'bg-yellow-200 dark:bg-yellow-800 text-yellow-900 dark:text-yellow-100 font-bold'
-                              : 'text-gray-500 dark:text-gray-300'
+                              ? 'bg-[#FFD700] dark:bg-yellow-600 text-gray-900 dark:text-white'
+                              : 'text-white dark:text-gray-200'
                           }`}
                         >
                           {submission.username}
@@ -287,8 +287,8 @@ export default function ViewPicksPage() {
                 </thead>
                 <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                   {/* Summary Points Row */}
-                  <tr className="bg-blue-50 dark:bg-blue-900/20 font-bold">
-                    <td className="px-4 py-3 text-sm font-bold text-gray-900 dark:text-white sticky left-0 bg-blue-50 dark:bg-blue-900/20 z-10 border-r border-gray-200 dark:border-gray-600 shadow-[2px_0_4px_rgba(0,0,0,0.1)]">
+                  <tr className="bg-[#0D4F3C]/20 dark:bg-green-700/30 font-black">
+                    <td className="px-4 py-3 text-sm font-black text-gray-900 dark:text-white sticky left-0 bg-[#0D4F3C]/20 dark:bg-green-700/30 z-10 border-r-4 border-gray-300 dark:border-gray-600 shadow-[2px_0_4px_rgba(0,0,0,0.1)] uppercase">
                       Points
                     </td>
                     {sortedSubmissions.map((submission) => {

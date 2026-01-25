@@ -125,22 +125,22 @@ export default function BetsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-black py-4 sm:py-8 px-4">
+    <div className="min-h-screen bg-[#F5F5F5] dark:bg-[#1A1A1A] py-4 sm:py-8 px-4">
       <div className="max-w-3xl mx-auto">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 sm:p-8">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border-4 border-[#0D4F3C] dark:border-green-600 p-4 sm:p-8">
           <div className="mb-6 sm:mb-8">
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-center gap-3 flex-1">
                 <img 
                   src="/logo.webp" 
                   alt="Family Bowl Logo" 
-                  className="h-10 sm:h-12 w-auto flex-shrink-0"
+                  className="h-10 sm:h-12 w-auto flex-shrink-0 drop-shadow-lg"
                 />
                 <div className="flex-1">
-                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                  <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white mb-2 uppercase tracking-tight">
                     {process.env.NEXT_PUBLIC_APP_TITLE || 'Super Bowl Prop Bets'}
                   </h1>
-                  <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
+                  <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300 font-semibold">
                     Welcome, {username}! Make your selections below.
                   </p>
                 </div>
@@ -152,32 +152,32 @@ export default function BetsPage() {
                     router.push('/login');
                   }
                 }}
-                className="flex-shrink-0 p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                className="flex-shrink-0 p-2 text-gray-600 dark:text-gray-400 hover:text-[#0D4F3C] dark:hover:text-green-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors border-2 border-transparent hover:border-[#0D4F3C] dark:hover:border-green-500"
                 title="Logout"
                 aria-label="Logout"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                 </svg>
               </button>
             </div>
           </div>
 
           {picksLocked && (
-            <div className="mb-6 bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded">
+            <div className="mb-6 bg-[#EF4444]/20 dark:bg-[#EF4444]/20 border-4 border-[#EF4444] dark:border-[#EF4444] text-[#EF4444] dark:text-[#EF4444] px-4 py-3 rounded-xl">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div className="flex items-start gap-2">
-                  <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-6 h-6 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                   </svg>
                   <div className="flex-1 min-w-0">
-                    <strong className="block">Picks are LOCKED</strong>
-                    <p className="text-sm mt-1">All picks have been locked by the administrator. You cannot modify your selections at this time.</p>
+                    <strong className="block font-black uppercase text-lg">Picks are LOCKED</strong>
+                    <p className="text-sm mt-1 font-semibold">All picks have been locked by the administrator. You cannot modify your selections at this time.</p>
                   </div>
                 </div>
                 <Link
                   href="/view-picks"
-                  className="w-full sm:w-auto px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors whitespace-nowrap text-center"
+                  className="w-full sm:w-auto px-5 py-3 bg-gradient-to-r from-[#0D4F3C] to-green-700 hover:from-green-700 hover:to-green-800 dark:from-green-600 dark:to-green-700 text-white rounded-xl text-sm font-black uppercase tracking-wider transition-all whitespace-nowrap text-center shadow-lg hover:shadow-xl transform hover:scale-105"
                 >
                   View All Picks
                 </Link>
@@ -186,7 +186,7 @@ export default function BetsPage() {
           )}
 
           {submitted && !picksLocked && (
-            <div className="mb-6 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 px-4 py-3 rounded">
+            <div className="mb-6 bg-[#10B981]/20 dark:bg-[#10B981]/20 border-4 border-[#10B981] dark:border-[#10B981] text-[#10B981] dark:text-[#10B981] px-4 py-3 rounded-xl font-bold">
               Your selections have been saved successfully! You can edit them at any time.
             </div>
           )}
@@ -197,7 +197,7 @@ export default function BetsPage() {
                 No bets have been configured yet.
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-500">
-                Please contact an administrator to set up the prop bets.
+                Please contact an 'Uncle Jim' to set up the prop bets.
               </p>
             </div>
           ) : (
@@ -208,14 +208,14 @@ export default function BetsPage() {
                   const isIntegerRange = betTypeDef?.isIntegerRange || false;
                   
                   return (
-                    <div key={bet.id} className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 items-start pb-4 md:pb-6 border-b border-gray-200 dark:border-gray-700 last:border-b-0">
+                    <div key={bet.id} className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 items-start pb-6 md:pb-8 border-b-4 border-gray-300 dark:border-gray-700 last:border-b-0">
                       {/* Left Column: Bet Question */}
                       <div className="md:pr-4">
-                        <label className="block text-base sm:text-lg font-medium text-gray-700 dark:text-gray-300">
+                        <label className="block text-base sm:text-lg font-black text-gray-900 dark:text-white uppercase tracking-tight">
                           {bet.question}
                         </label>
                         {isIntegerRange && betTypeDef && (
-                          <span className="block text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">
+                          <span className="block text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1 font-bold uppercase">
                             Range: {betTypeDef.minValue} - {betTypeDef.maxValue}
                           </span>
                         )}
@@ -235,15 +235,15 @@ export default function BetsPage() {
                 })}
               </div>
 
-              <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+              <div className="mt-8 pt-6 border-t-4 border-gray-300 dark:border-gray-700">
                 <button
                   type="submit"
                   disabled={!allBetsAnswered || submitting || picksLocked}
                   className={`
-                    w-full py-3 px-6 rounded-lg font-medium transition-colors
+                    w-full py-4 px-6 rounded-xl font-black uppercase tracking-wider transition-all shadow-lg
                     ${
                       allBetsAnswered && !submitting && !picksLocked
-                        ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                        ? 'bg-gradient-to-r from-[#0D4F3C] to-green-700 hover:from-green-700 hover:to-green-800 dark:from-green-600 dark:to-green-700 text-white hover:shadow-xl transform hover:scale-105'
                         : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
                     }
                   `}

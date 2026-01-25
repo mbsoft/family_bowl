@@ -1,8 +1,12 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
+  --background: #F5F5F5;
   --foreground: #171717;
+  --sports-primary: #0D4F3C;
+  --sports-accent: #FFD700;
+  --sports-success: #10B981;
+  --sports-error: #EF4444;
 }
 
 @theme inline {
@@ -14,7 +18,7 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
+    --background: #1A1A1A;
     --foreground: #ededed;
   }
 }
@@ -23,4 +27,5 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  font-weight: 500;
 }

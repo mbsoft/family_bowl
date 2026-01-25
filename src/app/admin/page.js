@@ -51,20 +51,20 @@ export default function AdminDashboard() {
 
   return (
     <ProtectedRoute requireAdmin={true}>
-      <div className="min-h-screen bg-zinc-50 dark:bg-black py-8 px-4">
+      <div className="min-h-screen bg-[#F5F5F5] dark:bg-[#1A1A1A] py-8 px-4">
         <div className="max-w-6xl mx-auto">
           <div className="mb-8">
             <div className="flex items-center gap-4 mb-4">
               <img 
                 src="/logo.webp" 
                 alt="Family Bowl Logo" 
-                className="h-12 w-auto"
+                className="h-14 w-auto drop-shadow-lg"
               />
               <div>
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                <h1 className="text-3xl font-black text-gray-900 dark:text-white mb-2 uppercase tracking-tight">
                   Admin Dashboard
                 </h1>
-                <p className="text-gray-600 dark:text-gray-400">
+                <p className="text-gray-700 dark:text-gray-300 font-semibold">
                   Welcome, {username}! Manage bets and view submissions.
                 </p>
               </div>
@@ -72,24 +72,24 @@ export default function AdminDashboard() {
           </div>
 
           {/* Lock Status Banner */}
-          <div className={`mb-6 rounded-lg shadow p-4 ${
+          <div className={`mb-6 rounded-2xl shadow-2xl p-6 border-4 ${
             picksLocked
-              ? 'bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800'
-              : 'bg-green-50 dark:bg-green-900/20 border-2 border-green-200 dark:border-green-800'
+              ? 'bg-[#EF4444]/20 dark:bg-[#EF4444]/20 border-[#EF4444] dark:border-[#EF4444]'
+              : 'bg-[#10B981]/20 dark:bg-[#10B981]/20 border-[#10B981] dark:border-[#10B981]'
           }`}>
             <div className="flex items-center justify-between">
               <div>
-                <h3 className={`text-lg font-semibold mb-1 ${
+                <h3 className={`text-xl font-black mb-1 uppercase tracking-wide ${
                   picksLocked
-                    ? 'text-red-700 dark:text-red-400'
-                    : 'text-green-700 dark:text-green-400'
+                    ? 'text-[#EF4444] dark:text-[#EF4444]'
+                    : 'text-[#10B981] dark:text-[#10B981]'
                 }`}>
                   Picks Status: {picksLocked ? 'LOCKED' : 'UNLOCKED'}
                 </h3>
-                <p className={`text-sm ${
+                <p className={`text-sm font-bold ${
                   picksLocked
-                    ? 'text-red-600 dark:text-red-300'
-                    : 'text-green-600 dark:text-green-300'
+                    ? 'text-[#EF4444] dark:text-[#EF4444]'
+                    : 'text-[#10B981] dark:text-[#10B981]'
                 }`}>
                   {picksLocked
                     ? 'Users cannot modify their picks. All submissions are locked.'
@@ -98,10 +98,10 @@ export default function AdminDashboard() {
               </div>
               <button
                 onClick={handleToggleLock}
-                className={`px-6 py-2 rounded-lg font-medium transition-colors ${
+                className={`px-6 py-3 rounded-xl font-black uppercase tracking-wider transition-all shadow-lg hover:shadow-xl transform hover:scale-105 ${
                   picksLocked
-                    ? 'bg-green-600 hover:bg-green-700 text-white'
-                    : 'bg-red-600 hover:bg-red-700 text-white'
+                    ? 'bg-gradient-to-r from-[#10B981] to-green-600 hover:from-green-600 hover:to-green-700 text-white'
+                    : 'bg-gradient-to-r from-[#EF4444] to-red-600 hover:from-red-600 hover:to-red-700 text-white'
                 }`}
               >
                 {picksLocked ? 'Unlock Picks' : 'Lock All Picks'}
@@ -110,62 +110,34 @@ export default function AdminDashboard() {
           </div>
 
           {/* Stats Panel */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border-4 border-[#0D4F3C] dark:border-green-600 p-6 mb-8">
+            <div className="mb-4">
+              <h2 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
                 Statistics
               </h2>
-              <button
-                onClick={async () => {
-                  const password = prompt('Enter admin password to migrate existing passwords to hashed format:');
-                  if (!password) return;
-                  
-                  if (confirm('This will hash all existing plain text passwords. Continue?')) {
-                    try {
-                      const response = await fetch('/api/migrate-passwords', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ adminPassword: password })
-                      });
-                      const result = await response.json();
-                      if (result.success) {
-                        alert(`Migration complete!\nMigrated: ${result.migrated}\nSkipped: ${result.skipped}`);
-                      } else {
-                        alert(`Migration failed: ${result.error || 'Unknown error'}`);
-                      }
-                    } catch (error) {
-                      alert(`Error: ${error.message}`);
-                    }
-                  }
-                }}
-                className="px-3 py-1 text-xs bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300 rounded hover:bg-yellow-200 dark:hover:bg-yellow-800"
-                title="Hash existing plain text passwords"
-              >
-                Migrate Passwords
-              </button>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
               <div className="text-center sm:text-left">
-                <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                <h3 className="text-sm font-black text-gray-600 dark:text-gray-400 mb-1 uppercase tracking-wide">
                   Total Bets
                 </h3>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                <p className="text-4xl font-black text-[#0D4F3C] dark:text-green-500">
                   {bets.length}
                 </p>
               </div>
-              <div className="text-center sm:text-left border-t sm:border-t-0 sm:border-l border-gray-200 dark:border-gray-700 pt-4 sm:pt-0 sm:pl-6">
-                <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+              <div className="text-center sm:text-left border-t-4 sm:border-t-0 sm:border-l-4 border-gray-300 dark:border-gray-700 pt-4 sm:pt-0 sm:pl-6">
+                <h3 className="text-sm font-black text-gray-600 dark:text-gray-400 mb-1 uppercase tracking-wide">
                   Total Submissions
                 </h3>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                <p className="text-4xl font-black text-[#0D4F3C] dark:text-green-500">
                   {submissions.length}
                 </p>
               </div>
-              <div className="text-center sm:text-left border-t sm:border-t-0 sm:border-l border-gray-200 dark:border-gray-700 pt-4 sm:pt-0 sm:pl-6">
-                <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+              <div className="text-center sm:text-left border-t-4 sm:border-t-0 sm:border-l-4 border-gray-300 dark:border-gray-700 pt-4 sm:pt-0 sm:pl-6">
+                <h3 className="text-sm font-black text-gray-600 dark:text-gray-400 mb-1 uppercase tracking-wide">
                   Completion Rate
                 </h3>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                <p className="text-4xl font-black text-[#0D4F3C] dark:text-green-500">
                   {bets.length > 0 && submissions.length > 0
                     ? `${Math.round((submissions.length / bets.length) * 100)}%`
                     : '0%'}
@@ -178,96 +150,96 @@ export default function AdminDashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <Link
               href="/admin/invites"
-              className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 hover:shadow-lg transition-shadow"
+              className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border-4 border-[#0D4F3C] dark:border-green-600 p-6 hover:shadow-xl transition-all transform hover:scale-105"
             >
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+              <h2 className="text-xl font-black text-gray-900 dark:text-white mb-2 uppercase tracking-tight">
                 Manage Invites
               </h2>
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-gray-700 dark:text-gray-300 font-semibold">
                 Generate and manage invite links for new users.
               </p>
             </Link>
 
             <Link
               href="/admin/users"
-              className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 hover:shadow-lg transition-shadow"
+              className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border-4 border-[#0D4F3C] dark:border-green-600 p-6 hover:shadow-xl transition-all transform hover:scale-105"
             >
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+              <h2 className="text-xl font-black text-gray-900 dark:text-white mb-2 uppercase tracking-tight">
                 Manage Users
               </h2>
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-gray-700 dark:text-gray-300 font-semibold">
                 View and delete registered users.
               </p>
             </Link>
 
             <Link
               href="/admin/bet-types"
-              className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 hover:shadow-lg transition-shadow"
+              className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border-4 border-[#0D4F3C] dark:border-green-600 p-6 hover:shadow-xl transition-all transform hover:scale-105"
             >
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+              <h2 className="text-xl font-black text-gray-900 dark:text-white mb-2 uppercase tracking-tight">
                 Manage Bet Types
               </h2>
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-gray-700 dark:text-gray-300 font-semibold">
                 Define and configure bet type options and labels.
               </p>
             </Link>
 
             <Link
               href="/admin/bets"
-              className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 hover:shadow-lg transition-shadow"
+              className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border-4 border-[#0D4F3C] dark:border-green-600 p-6 hover:shadow-xl transition-all transform hover:scale-105"
             >
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+              <h2 className="text-xl font-black text-gray-900 dark:text-white mb-2 uppercase tracking-tight">
                 Manage Bets
               </h2>
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-gray-700 dark:text-gray-300 font-semibold">
                 Add, edit, or delete prop bet questions.
               </p>
             </Link>
 
             <Link
               href="/admin/submissions"
-              className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 hover:shadow-lg transition-shadow"
+              className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border-4 border-[#0D4F3C] dark:border-green-600 p-6 hover:shadow-xl transition-all transform hover:scale-105"
             >
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+              <h2 className="text-xl font-black text-gray-900 dark:text-white mb-2 uppercase tracking-tight">
                 View Submissions
               </h2>
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-gray-700 dark:text-gray-300 font-semibold">
                 Review and edit all user submissions.
               </p>
             </Link>
 
             <Link
               href="/admin/export"
-              className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 hover:shadow-lg transition-shadow"
+              className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border-4 border-[#0D4F3C] dark:border-green-600 p-6 hover:shadow-xl transition-all transform hover:scale-105"
             >
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+              <h2 className="text-xl font-black text-gray-900 dark:text-white mb-2 uppercase tracking-tight">
                 Export Data
               </h2>
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-gray-700 dark:text-gray-300 font-semibold">
                 Download all submissions as an Excel spreadsheet.
               </p>
             </Link>
 
             <Link
               href="/admin/results"
-              className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 hover:shadow-lg transition-shadow"
+              className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border-4 border-[#0D4F3C] dark:border-green-600 p-6 hover:shadow-xl transition-all transform hover:scale-105"
             >
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+              <h2 className="text-xl font-black text-gray-900 dark:text-white mb-2 uppercase tracking-tight">
                 Set Bet Results
               </h2>
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-gray-700 dark:text-gray-300 font-semibold">
                 Enter correct results for each bet (requires picks to be locked).
               </p>
             </Link>
 
             <Link
               href="/view-picks"
-              className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 hover:shadow-lg transition-shadow"
+              className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border-4 border-[#0D4F3C] dark:border-green-600 p-6 hover:shadow-xl transition-all transform hover:scale-105"
             >
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+              <h2 className="text-xl font-black text-gray-900 dark:text-white mb-2 uppercase tracking-tight">
                 View All Picks
               </h2>
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-gray-700 dark:text-gray-300 font-semibold">
                 View everyone's picks in a table format with scoring.
               </p>
             </Link>
@@ -281,7 +253,7 @@ export default function AdminDashboard() {
                   window.location.href = '/login';
                 }
               }}
-              className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+              className="text-sm font-black text-gray-600 dark:text-gray-400 hover:text-[#0D4F3C] dark:hover:text-green-400 uppercase tracking-wide"
             >
               Logout
             </button>
