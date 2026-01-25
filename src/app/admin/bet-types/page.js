@@ -257,27 +257,34 @@ export default function AdminBetTypesPage() {
 
   return (
     <ProtectedRoute requireAdmin={true}>
-      <div className="min-h-screen bg-zinc-50 dark:bg-black py-8 px-4">
+      <div className="min-h-screen bg-[#F5F5F5] dark:bg-[#1A1A1A] py-8 px-4">
         <div className="max-w-4xl mx-auto">
           <div className="mb-8 flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                Manage Bet Types
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400">
-                Define and edit bet type configurations
-              </p>
+            <div className="flex items-center gap-4">
+              <img 
+                src="/logo.webp" 
+                alt="Family Bowl Logo" 
+                className="h-12 w-auto drop-shadow-lg"
+              />
+              <div>
+                <h1 className="text-3xl font-black text-gray-900 dark:text-white mb-2 uppercase tracking-tight">
+                  Manage Bet Types
+                </h1>
+                <p className="text-gray-700 dark:text-gray-300 font-semibold">
+                  Define and edit bet type configurations
+                </p>
+              </div>
             </div>
             <div className="flex gap-4">
               <button
                 onClick={() => router.push('/admin')}
-                className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                className="px-5 py-3 text-gray-700 dark:text-gray-300 hover:text-[#0D4F3C] dark:hover:text-green-400 rounded-xl text-sm font-black uppercase tracking-wider border-4 border-gray-400 dark:border-gray-600 hover:border-[#0D4F3C] dark:hover:border-green-500 transition-all"
               >
                 Back to Dashboard
               </button>
               <button
                 onClick={handleAdd}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
+                className="px-5 py-3 bg-gradient-to-r from-[#0D4F3C] to-green-700 hover:from-green-700 hover:to-green-800 dark:from-green-600 dark:to-green-700 text-white rounded-xl font-black uppercase tracking-wider shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
               >
                 Add New Bet Type
               </button>
@@ -285,13 +292,13 @@ export default function AdminBetTypesPage() {
           </div>
 
           {showAddForm && (
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border-4 border-[#0D4F3C] dark:border-green-600 p-6 mb-6">
+              <h2 className="text-xl font-black text-gray-900 dark:text-white mb-4 uppercase tracking-tight">
                 {editingBetType ? 'Edit Bet Type' : 'Add New Bet Type'}
               </h2>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-black text-gray-800 dark:text-gray-200 mb-2 uppercase tracking-wide">
                     ID (unique identifier)
                   </label>
                   <input
@@ -302,7 +309,7 @@ export default function AdminBetTypesPage() {
                     }
                     required
                     disabled={!!editingBetType}
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full px-4 py-3 border-3 border-gray-400 dark:border-gray-600 rounded-xl focus:ring-4 focus:ring-[#0D4F3C] focus:border-[#0D4F3C] dark:focus:ring-green-500 dark:focus:border-green-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                     placeholder="e.g., O/U"
                   />
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -311,7 +318,7 @@ export default function AdminBetTypesPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-black text-gray-800 dark:text-gray-200 mb-2 uppercase tracking-wide">
                     Label (display name)
                   </label>
                   <input
@@ -321,7 +328,7 @@ export default function AdminBetTypesPage() {
                       setFormData({ ...formData, label: e.target.value })
                     }
                     required
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full px-4 py-3 border-3 border-gray-400 dark:border-gray-600 rounded-xl focus:ring-4 focus:ring-[#0D4F3C] focus:border-[#0D4F3C] dark:focus:ring-green-500 dark:focus:border-green-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-semibold"
                     placeholder="e.g., Over/Under"
                   />
                 </div>
@@ -352,7 +359,7 @@ export default function AdminBetTypesPage() {
                 {formData.isIntegerRange ? (
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      <label className="block text-sm font-black text-gray-800 dark:text-gray-200 mb-2 uppercase tracking-wide">
                         Minimum Value
                       </label>
                       <input
@@ -365,11 +372,11 @@ export default function AdminBetTypesPage() {
                           })
                         }
                         required
-                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        className="w-full px-4 py-3 border-3 border-gray-400 dark:border-gray-600 rounded-xl focus:ring-4 focus:ring-[#0D4F3C] focus:border-[#0D4F3C] dark:focus:ring-green-500 dark:focus:border-green-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-semibold"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      <label className="block text-sm font-black text-gray-800 dark:text-gray-200 mb-2 uppercase tracking-wide">
                         Maximum Value
                       </label>
                       <input
@@ -382,7 +389,7 @@ export default function AdminBetTypesPage() {
                           })
                         }
                         required
-                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        className="w-full px-4 py-3 border-3 border-gray-400 dark:border-gray-600 rounded-xl focus:ring-4 focus:ring-[#0D4F3C] focus:border-[#0D4F3C] dark:focus:ring-green-500 dark:focus:border-green-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-semibold"
                       />
                     </div>
                   </div>
@@ -412,7 +419,7 @@ export default function AdminBetTypesPage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      <label className="block text-sm font-black text-gray-800 dark:text-gray-200 mb-2 uppercase tracking-wide">
                         Options
                       </label>
                   {formData.options.map((option, index) => (
@@ -422,7 +429,7 @@ export default function AdminBetTypesPage() {
                         value={option}
                         onChange={(e) => handleOptionChange(index, e.target.value)}
                         required
-                        className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        className="flex-1 px-4 py-3 border-3 border-gray-400 dark:border-gray-600 rounded-xl focus:ring-4 focus:ring-[#0D4F3C] focus:border-[#0D4F3C] dark:focus:ring-green-500 dark:focus:border-green-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-semibold"
                         placeholder={`Option ${index + 1} value`}
                       />
                       {!formData.requiresTeamNames && (
@@ -430,7 +437,7 @@ export default function AdminBetTypesPage() {
                           type="text"
                           value={formData.optionLabels[option] || ''}
                           onChange={(e) => handleOptionLabelChange(option, e.target.value)}
-                          className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                          className="flex-1 px-4 py-3 border-3 border-gray-400 dark:border-gray-600 rounded-xl focus:ring-4 focus:ring-[#0D4F3C] focus:border-[#0D4F3C] dark:focus:ring-green-500 dark:focus:border-green-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-semibold"
                           placeholder={`Option ${index + 1} label (optional)`}
                         />
                       )}
@@ -438,7 +445,7 @@ export default function AdminBetTypesPage() {
                         <button
                           type="button"
                           onClick={() => handleRemoveOption(index)}
-                          className="px-3 py-2 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 rounded hover:bg-red-200 dark:hover:bg-red-800"
+                          className="px-4 py-2 text-sm bg-gradient-to-r from-[#EF4444] to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl font-black uppercase tracking-wider shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
                         >
                           Remove
                         </button>
@@ -448,7 +455,7 @@ export default function AdminBetTypesPage() {
                       <button
                         type="button"
                         onClick={handleAddOption}
-                        className="mt-2 px-3 py-1 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
+                        className="mt-2 px-4 py-2 text-sm bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-300 rounded-xl font-black uppercase tracking-wider border-2 border-gray-400 dark:border-gray-600"
                       >
                         + Add Option
                       </button>
@@ -459,14 +466,14 @@ export default function AdminBetTypesPage() {
                 <div className="flex gap-4">
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
+                    className="px-5 py-3 bg-gradient-to-r from-[#0D4F3C] to-green-700 hover:from-green-700 hover:to-green-800 dark:from-green-600 dark:to-green-700 text-white rounded-xl font-black uppercase tracking-wider shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
                   >
                     {editingBetType ? 'Update Bet Type' : 'Add Bet Type'}
                   </button>
                   <button
                     type="button"
                     onClick={handleCancel}
-                    className="px-4 py-2 bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-300 rounded-lg"
+                    className="px-5 py-3 bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-300 rounded-xl font-black uppercase tracking-wider border-4 border-gray-400 dark:border-gray-600"
                   >
                     Cancel
                   </button>
@@ -475,13 +482,13 @@ export default function AdminBetTypesPage() {
             </div>
           )}
 
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border-4 border-[#0D4F3C] dark:border-green-600 overflow-hidden">
             {betTypes.length === 0 ? (
-              <div className="p-8 text-center text-gray-600 dark:text-gray-400">
+              <div className="p-8 text-center text-gray-700 dark:text-gray-300 font-bold">
                 No bet types configured. Click "Add New Bet Type" to get started.
               </div>
             ) : (
-              <div className="divide-y divide-gray-200 dark:divide-gray-700">
+              <div className="divide-y-4 divide-gray-300 dark:divide-gray-700">
                 {betTypes.map((betType) => (
                   <div
                     key={betType.id}
@@ -489,39 +496,39 @@ export default function AdminBetTypesPage() {
                   >
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+                        <h3 className="text-lg font-black text-gray-900 dark:text-white mb-1 uppercase">
                           {betType.label}
                         </h3>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-                          ID: <span className="font-mono">{betType.id}</span>
+                        <p className="text-sm text-gray-700 dark:text-gray-300 mb-2 font-semibold">
+                          ID: <span className="font-mono font-black">{betType.id}</span>
                           {betType.requiresTeamNames && (
-                            <span className="ml-2 px-2 py-0.5 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded text-xs">
+                            <span className="ml-2 px-3 py-1 bg-[#0D4F3C]/20 dark:bg-green-700/20 border-2 border-[#0D4F3C] dark:border-green-600 text-[#0D4F3C] dark:text-green-400 rounded-xl text-xs font-black uppercase">
                               Team Selection
                             </span>
                           )}
                           {betType.isIntegerRange && (
-                            <span className="ml-2 px-2 py-0.5 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 rounded text-xs">
+                            <span className="ml-2 px-3 py-1 bg-[#10B981]/20 dark:bg-[#10B981]/20 border-2 border-[#10B981] dark:border-[#10B981] text-[#10B981] dark:text-[#10B981] rounded-xl text-xs font-black uppercase">
                               Integer Range
                             </span>
                           )}
                         </p>
-                        <div className="text-sm text-gray-600 dark:text-gray-400">
+                        <div className="text-sm text-gray-700 dark:text-gray-300 font-semibold">
                           {betType.isIntegerRange ? (
                             <span>
-                              <span className="font-medium">Range:</span>{' '}
+                              <span className="font-black uppercase">Range:</span>{' '}
                               {betType.minValue} - {betType.maxValue}
                             </span>
                           ) : (
                             <>
-                              <span className="font-medium">Options:</span>{' '}
+                              <span className="font-black uppercase">Options:</span>{' '}
                               {betType.options.map((opt, idx) => {
                                 const label = betType.optionLabels?.[opt] || opt;
                                 return (
                                   <span key={idx}>
                                     {idx > 0 && ', '}
-                                    <span className="font-mono">{opt}</span>
+                                    <span className="font-mono font-black">{opt}</span>
                                     {betType.optionLabels?.[opt] && (
-                                      <span className="text-gray-500"> ({label})</span>
+                                      <span className="text-gray-600 dark:text-gray-400"> ({label})</span>
                                     )}
                                   </span>
                                 );
@@ -533,13 +540,13 @@ export default function AdminBetTypesPage() {
                       <div className="flex gap-2 ml-4">
                         <button
                           onClick={() => handleEdit(betType)}
-                          className="px-3 py-1 text-sm bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded hover:bg-blue-200 dark:hover:bg-blue-800"
+                          className="px-4 py-2 text-sm bg-gradient-to-r from-[#0D4F3C] to-green-700 hover:from-green-700 hover:to-green-800 dark:from-green-600 dark:to-green-700 text-white rounded-xl font-black uppercase tracking-wider shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
                         >
                           Edit
                         </button>
                         <button
                           onClick={() => handleDelete(betType.id)}
-                          className="px-3 py-1 text-sm bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 rounded hover:bg-red-200 dark:hover:bg-red-800"
+                          className="px-4 py-2 text-sm bg-gradient-to-r from-[#EF4444] to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl font-black uppercase tracking-wider shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
                         >
                           Delete
                         </button>

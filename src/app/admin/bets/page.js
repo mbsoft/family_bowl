@@ -199,27 +199,34 @@ export default function AdminBetsPage() {
 
   return (
     <ProtectedRoute requireAdmin={true}>
-      <div className="min-h-screen bg-zinc-50 dark:bg-black py-8 px-4">
+      <div className="min-h-screen bg-[#F5F5F5] dark:bg-[#1A1A1A] py-8 px-4">
         <div className="max-w-4xl mx-auto">
           <div className="mb-8 flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                Manage Bets
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400">
-                Add, edit, or delete prop bet questions
-              </p>
+            <div className="flex items-center gap-4">
+              <img 
+                src="/logo.webp" 
+                alt="Family Bowl Logo" 
+                className="h-12 w-auto drop-shadow-lg"
+              />
+              <div>
+                <h1 className="text-3xl font-black text-gray-900 dark:text-white mb-2 uppercase tracking-tight">
+                  Manage Bets
+                </h1>
+                <p className="text-gray-700 dark:text-gray-300 font-semibold">
+                  Add, edit, or delete prop bet questions
+                </p>
+              </div>
             </div>
             <div className="flex gap-4">
               <button
                 onClick={() => router.push('/admin')}
-                className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                className="px-5 py-3 text-gray-700 dark:text-gray-300 hover:text-[#0D4F3C] dark:hover:text-green-400 rounded-xl text-sm font-black uppercase tracking-wider border-4 border-gray-400 dark:border-gray-600 hover:border-[#0D4F3C] dark:hover:border-green-500 transition-all"
               >
                 Back to Dashboard
               </button>
               <button
                 onClick={handleAdd}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
+                className="px-5 py-3 bg-gradient-to-r from-[#0D4F3C] to-green-700 hover:from-green-700 hover:to-green-800 dark:from-green-600 dark:to-green-700 text-white rounded-xl font-black uppercase tracking-wider shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
               >
                 Add New Bet
               </button>
@@ -227,13 +234,13 @@ export default function AdminBetsPage() {
           </div>
 
           {showAddForm && (
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border-4 border-[#0D4F3C] dark:border-green-600 p-6 mb-6">
+              <h2 className="text-xl font-black text-gray-900 dark:text-white mb-4 uppercase tracking-tight">
                 {editingBet ? 'Edit Bet' : 'Add New Bet'}
               </h2>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-black text-gray-800 dark:text-gray-200 mb-2 uppercase tracking-wide">
                     Question
                   </label>
                   <input
@@ -243,13 +250,13 @@ export default function AdminBetsPage() {
                       setFormData({ ...formData, question: e.target.value })
                     }
                     required
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full px-4 py-3 border-3 border-gray-400 dark:border-gray-600 rounded-xl focus:ring-4 focus:ring-[#0D4F3C] focus:border-[#0D4F3C] dark:focus:ring-green-500 dark:focus:border-green-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-semibold"
                     placeholder="Enter bet question"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-black text-gray-800 dark:text-gray-200 mb-2 uppercase tracking-wide">
                     Bet Type
                   </label>
                   <select
@@ -257,7 +264,7 @@ export default function AdminBetsPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, type: e.target.value, teamNames: { option1: '', option2: '' } })
                     }
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full px-4 py-3 border-3 border-gray-400 dark:border-gray-600 rounded-xl focus:ring-4 focus:ring-[#0D4F3C] focus:border-[#0D4F3C] dark:focus:ring-green-500 dark:focus:border-green-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-semibold"
                     required
                   >
                     {betTypes.length === 0 ? (
@@ -282,7 +289,7 @@ export default function AdminBetsPage() {
                 {selectedBetType && selectedBetType.requiresTeamNames && (
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      <label className="block text-sm font-black text-gray-800 dark:text-gray-200 mb-2 uppercase tracking-wide">
                         Team 1 Name
                       </label>
                       <input
@@ -298,12 +305,12 @@ export default function AdminBetsPage() {
                           })
                         }
                         required
-                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        className="w-full px-4 py-3 border-3 border-gray-400 dark:border-gray-600 rounded-xl focus:ring-4 focus:ring-[#0D4F3C] focus:border-[#0D4F3C] dark:focus:ring-green-500 dark:focus:border-green-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-semibold"
                         placeholder="e.g., KC"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      <label className="block text-sm font-black text-gray-800 dark:text-gray-200 mb-2 uppercase tracking-wide">
                         Team 2 Name
                       </label>
                       <input
@@ -319,7 +326,7 @@ export default function AdminBetsPage() {
                           })
                         }
                         required
-                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        className="w-full px-4 py-3 border-3 border-gray-400 dark:border-gray-600 rounded-xl focus:ring-4 focus:ring-[#0D4F3C] focus:border-[#0D4F3C] dark:focus:ring-green-500 dark:focus:border-green-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-semibold"
                         placeholder="e.g., PHL"
                       />
                     </div>
@@ -329,14 +336,14 @@ export default function AdminBetsPage() {
                 <div className="flex gap-4">
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
+                    className="px-5 py-3 bg-gradient-to-r from-[#0D4F3C] to-green-700 hover:from-green-700 hover:to-green-800 dark:from-green-600 dark:to-green-700 text-white rounded-xl font-black uppercase tracking-wider shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
                   >
                     {editingBet ? 'Update Bet' : 'Add Bet'}
                   </button>
                   <button
                     type="button"
                     onClick={handleCancel}
-                    className="px-4 py-2 bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-300 rounded-lg"
+                    className="px-5 py-3 bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-300 rounded-xl font-black uppercase tracking-wider border-4 border-gray-400 dark:border-gray-600"
                   >
                     Cancel
                   </button>
@@ -345,13 +352,13 @@ export default function AdminBetsPage() {
             </div>
           )}
 
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border-4 border-[#0D4F3C] dark:border-green-600 overflow-hidden">
             {bets.length === 0 ? (
-              <div className="p-8 text-center text-gray-600 dark:text-gray-400">
+              <div className="p-8 text-center text-gray-700 dark:text-gray-300 font-bold">
                 No bets configured. Click "Add New Bet" to get started.
               </div>
             ) : (
-              <div className="divide-y divide-gray-200 dark:divide-gray-700">
+              <div className="divide-y-4 divide-gray-300 dark:divide-gray-700">
                 {bets.map((bet, index) => (
                   <div
                     key={bet.id}
@@ -411,10 +418,10 @@ export default function AdminBetsPage() {
                         </div>
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
-                            <span className="text-xs font-medium text-gray-400 dark:text-gray-500">
+                            <span className="text-xs font-black text-gray-600 dark:text-gray-400 uppercase">
                               #{index + 1}
                             </span>
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                            <h3 className="text-lg font-black text-gray-900 dark:text-white uppercase">
                               {bet.question}
                             </h3>
                           </div>
@@ -431,13 +438,13 @@ export default function AdminBetsPage() {
                       <div className="flex gap-2 ml-4">
                         <button
                           onClick={() => handleEdit(bet)}
-                          className="px-3 py-1 text-sm bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded hover:bg-blue-200 dark:hover:bg-blue-800"
+                          className="px-4 py-2 text-sm bg-gradient-to-r from-[#0D4F3C] to-green-700 hover:from-green-700 hover:to-green-800 dark:from-green-600 dark:to-green-700 text-white rounded-xl font-black uppercase tracking-wider shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
                         >
                           Edit
                         </button>
                         <button
                           onClick={() => handleDelete(bet.id)}
-                          className="px-3 py-1 text-sm bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 rounded hover:bg-red-200 dark:hover:bg-red-800"
+                          className="px-4 py-2 text-sm bg-gradient-to-r from-[#EF4444] to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl font-black uppercase tracking-wider shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
                         >
                           Delete
                         </button>

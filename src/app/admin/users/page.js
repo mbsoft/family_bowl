@@ -101,20 +101,27 @@ export default function AdminUsersPage() {
 
   return (
     <ProtectedRoute requireAdmin={true}>
-      <div className="min-h-screen bg-zinc-50 dark:bg-black py-8 px-4">
+      <div className="min-h-screen bg-[#F5F5F5] dark:bg-[#1A1A1A] py-8 px-4">
         <div className="max-w-6xl mx-auto">
           <div className="mb-8 flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                Manage Users
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400">
-                View and manage all registered users
-              </p>
+            <div className="flex items-center gap-4">
+              <img 
+                src="/logo.webp" 
+                alt="Family Bowl Logo" 
+                className="h-12 w-auto drop-shadow-lg"
+              />
+              <div>
+                <h1 className="text-3xl font-black text-gray-900 dark:text-white mb-2 uppercase tracking-tight">
+                  Manage Users
+                </h1>
+                <p className="text-gray-700 dark:text-gray-300 font-semibold">
+                  View and manage all registered users
+                </p>
+              </div>
             </div>
             <button
               onClick={() => router.push('/admin')}
-              className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+              className="px-5 py-3 text-gray-700 dark:text-gray-300 hover:text-[#0D4F3C] dark:hover:text-green-400 rounded-xl text-sm font-black uppercase tracking-wider border-4 border-gray-400 dark:border-gray-600 hover:border-[#0D4F3C] dark:hover:border-green-500 transition-all"
             >
               Back to Dashboard
             </button>
@@ -126,17 +133,17 @@ export default function AdminUsersPage() {
               placeholder="Search by username..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full max-w-md px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full max-w-md px-4 py-3 border-3 border-gray-400 dark:border-gray-600 rounded-xl focus:ring-4 focus:ring-[#0D4F3C] focus:border-[#0D4F3C] dark:focus:ring-green-500 dark:focus:border-green-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-semibold"
             />
           </div>
 
           {filteredUsers.length === 0 ? (
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 text-center text-gray-600 dark:text-gray-400">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border-4 border-[#0D4F3C] dark:border-green-600 p-8 text-center text-gray-700 dark:text-gray-300 font-bold">
               {searchTerm ? 'No users found matching your search.' : 'No users registered yet.'}
             </div>
           ) : (
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
-              <div className="divide-y divide-gray-200 dark:divide-gray-700">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border-4 border-[#0D4F3C] dark:border-green-600 overflow-hidden">
+              <div className="divide-y-4 divide-gray-300 dark:divide-gray-700">
                 {filteredUsers.map((user) => {
                   const submissionCount = submissions[user.username] || 0;
                   const isAdmin = user.username.toLowerCase() === 'admin';
@@ -149,16 +156,16 @@ export default function AdminUsersPage() {
                       <div className="flex justify-between items-start">
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                            <h3 className="text-lg font-black text-gray-900 dark:text-white uppercase">
                               {user.username}
                             </h3>
                             {isAdmin && (
-                              <span className="px-2 py-0.5 bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 rounded text-xs font-medium">
+                              <span className="px-3 py-1 bg-[#FFD700] dark:bg-yellow-600 text-gray-900 dark:text-white rounded-xl text-xs font-black uppercase tracking-wide border-2 border-yellow-600 dark:border-yellow-500">
                                 Admin
                               </span>
                             )}
                           </div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400 space-y-1">
+                          <div className="text-sm text-gray-700 dark:text-gray-300 space-y-1 font-semibold">
                             <p>
                               Created: {new Date(user.createdAt).toLocaleString()}
                             </p>
@@ -175,7 +182,7 @@ export default function AdminUsersPage() {
                         {!isAdmin && (
                           <button
                             onClick={() => handleDelete(user.username)}
-                            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium"
+                            className="px-5 py-3 bg-gradient-to-r from-[#EF4444] to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl text-sm font-black uppercase tracking-wider shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
                           >
                             Delete User
                           </button>
@@ -188,9 +195,9 @@ export default function AdminUsersPage() {
             </div>
           )}
 
-          <div className="mt-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
-            <p className="text-sm text-yellow-700 dark:text-yellow-300">
-              <strong>Warning:</strong> Deleting a user will permanently remove their account and all associated submissions. This action cannot be undone.
+          <div className="mt-6 p-4 bg-[#FFD700]/20 dark:bg-yellow-600/20 border-4 border-[#FFD700] dark:border-yellow-600 rounded-xl">
+            <p className="text-sm text-gray-900 dark:text-white font-bold">
+              <strong className="uppercase">Warning:</strong> Deleting a user will permanently remove their account and all associated submissions. This action cannot be undone.
             </p>
           </div>
         </div>

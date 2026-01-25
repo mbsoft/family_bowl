@@ -111,20 +111,27 @@ export default function AdminSubmissionsPage() {
 
   return (
     <ProtectedRoute requireAdmin={true}>
-      <div className="min-h-screen bg-zinc-50 dark:bg-black py-8 px-4">
+      <div className="min-h-screen bg-[#F5F5F5] dark:bg-[#1A1A1A] py-8 px-4">
         <div className="max-w-6xl mx-auto">
           <div className="mb-8 flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                View Submissions
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400">
-                Review and edit all user submissions
-              </p>
+            <div className="flex items-center gap-4">
+              <img 
+                src="/logo.webp" 
+                alt="Family Bowl Logo" 
+                className="h-12 w-auto drop-shadow-lg"
+              />
+              <div>
+                <h1 className="text-3xl font-black text-gray-900 dark:text-white mb-2 uppercase tracking-tight">
+                  View Submissions
+                </h1>
+                <p className="text-gray-700 dark:text-gray-300 font-semibold">
+                  Review and edit all user submissions
+                </p>
+              </div>
             </div>
             <button
               onClick={() => router.push('/admin')}
-              className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+              className="px-5 py-3 text-gray-700 dark:text-gray-300 hover:text-[#0D4F3C] dark:hover:text-green-400 rounded-xl text-sm font-black uppercase tracking-wider border-4 border-gray-400 dark:border-gray-600 hover:border-[#0D4F3C] dark:hover:border-green-500 transition-all"
             >
               Back to Dashboard
             </button>
@@ -136,12 +143,12 @@ export default function AdminSubmissionsPage() {
               placeholder="Search by username..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full max-w-md px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full max-w-md px-4 py-3 border-3 border-gray-400 dark:border-gray-600 rounded-xl focus:ring-4 focus:ring-[#0D4F3C] focus:border-[#0D4F3C] dark:focus:ring-green-500 dark:focus:border-green-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-semibold"
             />
           </div>
 
           {filteredSubmissions.length === 0 ? (
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 text-center text-gray-600 dark:text-gray-400">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border-4 border-[#0D4F3C] dark:border-green-600 p-8 text-center text-gray-700 dark:text-gray-300 font-bold">
               {searchTerm ? 'No submissions found matching your search.' : 'No submissions yet.'}
             </div>
           ) : (
@@ -149,14 +156,14 @@ export default function AdminSubmissionsPage() {
               {filteredSubmissions.map((submission) => (
                 <div
                   key={submission.username}
-                  className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6"
+                  className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border-4 border-[#0D4F3C] dark:border-green-600 p-6"
                 >
                   <div className="flex justify-between items-start mb-4">
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                      <h3 className="text-lg font-black text-gray-900 dark:text-white uppercase">
                         {submission.username}
                       </h3>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                      <p className="text-sm text-gray-700 dark:text-gray-300 font-semibold">
                         Submitted: {new Date(submission.timestamp).toLocaleString()}
                       </p>
                     </div>
@@ -164,13 +171,13 @@ export default function AdminSubmissionsPage() {
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleEdit(submission)}
-                          className="px-3 py-1 text-sm bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded hover:bg-blue-200 dark:hover:bg-blue-800"
+                          className="px-4 py-2 text-sm bg-gradient-to-r from-[#0D4F3C] to-green-700 hover:from-green-700 hover:to-green-800 dark:from-green-600 dark:to-green-700 text-white rounded-xl font-black uppercase tracking-wide shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
                         >
                           Edit
                         </button>
                         <button
                           onClick={() => handleDelete(submission)}
-                          className="px-3 py-1 text-sm bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 rounded hover:bg-red-200 dark:hover:bg-red-800"
+                          className="px-4 py-2 text-sm bg-gradient-to-r from-[#EF4444] to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl font-black uppercase tracking-wide shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
                         >
                           Delete
                         </button>
@@ -187,11 +194,11 @@ export default function AdminSubmissionsPage() {
                         const currentValue = editingSelections[bet.id] || '';
 
                         return (
-                          <div key={bet.id} className="border-b border-gray-200 dark:border-gray-700 pb-4">
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          <div key={bet.id} className="border-b-4 border-gray-300 dark:border-gray-700 pb-4">
+                            <label className="block text-sm font-black text-gray-800 dark:text-gray-200 mb-2 uppercase tracking-wide">
                               {bet.question}
                               {isIntegerRange && betTypeDef && (
-                                <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">
+                                <span className="ml-2 text-xs text-gray-600 dark:text-gray-400 font-bold">
                                   (Range: {betTypeDef.minValue} - {betTypeDef.maxValue})
                                 </span>
                               )}
@@ -214,11 +221,11 @@ export default function AdminSubmissionsPage() {
                                   min={betTypeDef?.minValue || 0}
                                   max={betTypeDef?.maxValue || 100}
                                   placeholder={`Enter a number between ${betTypeDef?.minValue || 0} and ${betTypeDef?.maxValue || 100}`}
-                                  className="w-full max-w-xs px-4 py-2 border-2 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800"
+                                  className="w-full max-w-xs px-4 py-3 border-3 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-gray-400 dark:border-gray-600 focus:border-[#0D4F3C] focus:ring-4 focus:ring-[#0D4F3C]/20 dark:focus:border-green-500 dark:focus:ring-green-500/20 font-semibold"
                                 />
                               </div>
                             ) : (
-                              <div className="flex gap-4 flex-wrap">
+                              <div className="flex gap-3 flex-wrap">
                                 {options.map((option) => {
                                   const label = getBetOptionLabel(bet.type, option, bet.teamNames, betTypes);
                                   const isSelected = editingSelections[bet.id] === option;
@@ -226,11 +233,11 @@ export default function AdminSubmissionsPage() {
                                     <label
                                       key={option}
                                       className={`
-                                        flex items-center px-3 py-1 rounded cursor-pointer
+                                        flex items-center px-5 py-3 rounded-xl border-4 cursor-pointer font-bold uppercase tracking-wide transition-all
                                         ${
                                           isSelected
-                                            ? 'bg-blue-500 text-white'
-                                            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                                            ? 'bg-[#0D4F3C] text-white border-[#0D4F3C] dark:bg-green-600 dark:border-green-600 shadow-lg scale-105'
+                                            : 'bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 border-gray-400 dark:border-gray-600 hover:border-[#0D4F3C] dark:hover:border-green-500'
                                         }
                                       `}
                                     >
@@ -254,13 +261,13 @@ export default function AdminSubmissionsPage() {
                       <div className="flex gap-4 mt-4">
                         <button
                           onClick={handleSave}
-                          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
+                          className="px-5 py-3 bg-gradient-to-r from-[#0D4F3C] to-green-700 hover:from-green-700 hover:to-green-800 dark:from-green-600 dark:to-green-700 text-white rounded-xl font-black uppercase tracking-wider shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
                         >
                           Save Changes
                         </button>
                         <button
                           onClick={handleCancel}
-                          className="px-4 py-2 bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-300 rounded-lg"
+                          className="px-5 py-3 bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-300 rounded-xl font-black uppercase tracking-wider border-4 border-gray-400 dark:border-gray-600"
                         >
                           Cancel
                         </button>
@@ -278,9 +285,9 @@ export default function AdminSubmissionsPage() {
                             key={bet.id}
                             className="flex justify-between text-sm py-2 border-b border-gray-100 dark:border-gray-700"
                           >
-                            <span className="text-gray-600 dark:text-gray-400">{bet.question}</span>
+                            <span className="text-gray-700 dark:text-gray-300 font-semibold">{bet.question}</span>
                             <span
-                              className={`font-medium ${
+                              className={`font-bold ${
                                 selection
                                   ? 'text-gray-900 dark:text-white'
                                   : 'text-gray-400 dark:text-gray-500'

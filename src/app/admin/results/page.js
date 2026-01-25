@@ -80,19 +80,19 @@ export default function AdminResultsPage() {
   if (!picksLocked) {
     return (
       <ProtectedRoute requireAdmin={true}>
-        <div className="min-h-screen bg-zinc-50 dark:bg-black py-8 px-4">
+        <div className="min-h-screen bg-[#F5F5F5] dark:bg-[#1A1A1A] py-8 px-4">
           <div className="max-w-4xl mx-auto">
-            <div className="bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-200 dark:border-yellow-800 rounded-lg p-6 mb-6">
-              <h2 className="text-xl font-semibold text-yellow-800 dark:text-yellow-300 mb-2">
+            <div className="bg-[#FFD700]/20 dark:bg-yellow-600/20 border-4 border-[#FFD700] dark:border-yellow-600 rounded-2xl p-6 mb-6">
+              <h2 className="text-xl font-black text-gray-900 dark:text-white mb-2 uppercase tracking-tight">
                 Picks Must Be Locked
               </h2>
-              <p className="text-yellow-700 dark:text-yellow-400">
+              <p className="text-gray-900 dark:text-white font-bold">
                 You can only set bet results after picks have been locked. Please lock all picks first from the admin dashboard.
               </p>
             </div>
             <button
               onClick={() => router.push('/admin')}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
+              className="px-5 py-3 bg-gradient-to-r from-[#0D4F3C] to-green-700 hover:from-green-700 hover:to-green-800 dark:from-green-600 dark:to-green-700 text-white rounded-xl font-black uppercase tracking-wider shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
             >
               Back to Dashboard
             </button>
@@ -104,32 +104,39 @@ export default function AdminResultsPage() {
 
   return (
     <ProtectedRoute requireAdmin={true}>
-      <div className="min-h-screen bg-zinc-50 dark:bg-black py-8 px-4">
+      <div className="min-h-screen bg-[#F5F5F5] dark:bg-[#1A1A1A] py-8 px-4">
         <div className="max-w-4xl mx-auto">
           <div className="mb-8 flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                Set Bet Results
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400">
-                Enter the correct result for each bet. Results will be displayed in the view all picks table.
-              </p>
+            <div className="flex items-center gap-4">
+              <img 
+                src="/logo.webp" 
+                alt="Family Bowl Logo" 
+                className="h-12 w-auto drop-shadow-lg"
+              />
+              <div>
+                <h1 className="text-3xl font-black text-gray-900 dark:text-white mb-2 uppercase tracking-tight">
+                  Set Bet Results
+                </h1>
+                <p className="text-gray-700 dark:text-gray-300 font-semibold">
+                  Enter the correct result for each bet. Results will be displayed in the view all picks table.
+                </p>
+              </div>
             </div>
             <button
               onClick={() => router.push('/admin')}
-              className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+              className="px-5 py-3 text-gray-700 dark:text-gray-300 hover:text-[#0D4F3C] dark:hover:text-green-400 rounded-xl text-sm font-black uppercase tracking-wider border-4 border-gray-400 dark:border-gray-600 hover:border-[#0D4F3C] dark:hover:border-green-500 transition-all"
             >
               Back to Dashboard
             </button>
           </div>
 
           {bets.length === 0 ? (
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 text-center text-gray-600 dark:text-gray-400">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border-4 border-[#0D4F3C] dark:border-green-600 p-8 text-center text-gray-700 dark:text-gray-300 font-bold">
               <p>No bets have been created yet.</p>
             </div>
           ) : (
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
-              <div className="divide-y divide-gray-200 dark:divide-gray-700">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border-4 border-[#0D4F3C] dark:border-green-600 overflow-hidden">
+              <div className="divide-y-4 divide-gray-300 dark:divide-gray-700">
                 {bets.map((bet) => {
                   const betType = betTypes.find(bt => bt.id === bet.type);
                   const options = betType ? getBetOptions(bet.type, bet.teamNames, betTypes) : [];
@@ -143,17 +150,17 @@ export default function AdminResultsPage() {
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                          <h3 className="text-lg font-black text-gray-900 dark:text-white mb-2 uppercase">
                             {bet.question}
                           </h3>
-                          <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
+                          <p className="text-sm text-gray-700 dark:text-gray-300 mb-3 font-semibold">
                             Type: {betType ? betType.label : bet.type}
                           </p>
                           
                           {isEditing ? (
                             <div className="space-y-3">
                               <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                <label className="block text-sm font-black text-gray-800 dark:text-gray-200 mb-2 uppercase tracking-wide">
                                   Result:
                                 </label>
                                 {betType?.isIntegerRange ? (
@@ -164,13 +171,13 @@ export default function AdminResultsPage() {
                                     min={betType.minValue}
                                     max={betType.maxValue}
                                     placeholder={`Enter integer between ${betType.minValue} and ${betType.maxValue}`}
-                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    className="w-full px-4 py-3 border-3 border-gray-400 dark:border-gray-600 rounded-xl focus:ring-4 focus:ring-[#0D4F3C] focus:border-[#0D4F3C] dark:focus:ring-green-500 dark:focus:border-green-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-semibold"
                                   />
                                 ) : options.length > 0 ? (
                                   <select
                                     value={resultValue}
                                     onChange={(e) => setResultValue(e.target.value)}
-                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    className="w-full px-4 py-3 border-3 border-gray-400 dark:border-gray-600 rounded-xl focus:ring-4 focus:ring-[#0D4F3C] focus:border-[#0D4F3C] dark:focus:ring-green-500 dark:focus:border-green-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-semibold"
                                   >
                                     <option value="">Select result...</option>
                                     {options.map((option) => (
@@ -185,20 +192,20 @@ export default function AdminResultsPage() {
                                     value={resultValue}
                                     onChange={(e) => setResultValue(e.target.value)}
                                     placeholder="Enter result..."
-                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    className="w-full px-4 py-3 border-3 border-gray-400 dark:border-gray-600 rounded-xl focus:ring-4 focus:ring-[#0D4F3C] focus:border-[#0D4F3C] dark:focus:ring-green-500 dark:focus:border-green-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-semibold"
                                   />
                                 )}
                               </div>
                               <div className="flex gap-2">
                                 <button
                                   onClick={() => handleSaveResult(bet.id)}
-                                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
+                                  className="px-5 py-3 bg-gradient-to-r from-[#0D4F3C] to-green-700 hover:from-green-700 hover:to-green-800 dark:from-green-600 dark:to-green-700 text-white rounded-xl font-black uppercase tracking-wider shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
                                 >
                                   Save
                                 </button>
                                 <button
                                   onClick={handleCancel}
-                                  className="px-4 py-2 bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-300 rounded-lg"
+                                  className="px-5 py-3 bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-300 rounded-xl font-black uppercase tracking-wider border-4 border-gray-400 dark:border-gray-600"
                                 >
                                   Cancel
                                 </button>
@@ -209,20 +216,20 @@ export default function AdminResultsPage() {
                               {currentResult ? (
                                 <>
                                   <div className="flex items-center gap-2">
-                                    <span className="text-sm text-gray-600 dark:text-gray-400">Result:</span>
-                                    <span className="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-300 rounded-lg font-medium">
+                                    <span className="text-sm text-gray-700 dark:text-gray-300 font-semibold">Result:</span>
+                                    <span className="px-4 py-2 bg-[#10B981]/20 dark:bg-[#10B981]/20 border-4 border-[#10B981] dark:border-[#10B981] text-[#10B981] dark:text-[#10B981] rounded-xl font-bold">
                                       {getBetOptionLabel(bet.type, currentResult, bet.teamNames, betTypes)}
                                     </span>
                                   </div>
                                   <button
                                     onClick={() => handleSetResult(bet)}
-                                    className="px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
+                                    className="px-4 py-2 text-sm bg-gradient-to-r from-[#0D4F3C] to-green-700 hover:from-green-700 hover:to-green-800 dark:from-green-600 dark:to-green-700 text-white rounded-xl font-black uppercase tracking-wider shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
                                   >
                                     Edit
                                   </button>
                                   <button
                                     onClick={() => handleDeleteResult(bet.id)}
-                                    className="px-3 py-1 text-sm bg-red-600 hover:bg-red-700 text-white rounded-lg"
+                                    className="px-4 py-2 text-sm bg-gradient-to-r from-[#EF4444] to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl font-black uppercase tracking-wider shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
                                   >
                                     Delete
                                   </button>
@@ -230,7 +237,7 @@ export default function AdminResultsPage() {
                               ) : (
                                 <button
                                   onClick={() => handleSetResult(bet)}
-                                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
+                                  className="px-5 py-3 bg-gradient-to-r from-[#0D4F3C] to-green-700 hover:from-green-700 hover:to-green-800 dark:from-green-600 dark:to-green-700 text-white rounded-xl font-black uppercase tracking-wider shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
                                 >
                                   Set Result
                                 </button>
@@ -246,9 +253,9 @@ export default function AdminResultsPage() {
             </div>
           )}
 
-          <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-            <p className="text-sm text-blue-700 dark:text-blue-300">
-              <strong>Note:</strong> Once you set a result for a bet, it will appear in the "View All Picks" table. 
+          <div className="mt-6 p-4 bg-[#0D4F3C]/20 dark:bg-green-700/20 border-4 border-[#0D4F3C] dark:border-green-600 rounded-xl">
+            <p className="text-sm text-gray-900 dark:text-white font-bold">
+              <strong className="uppercase">Note:</strong> Once you set a result for a bet, it will appear in the "View All Picks" table. 
               Correct picks will be highlighted in green, and incorrect picks will be highlighted in red. 
               Users will see their point totals in the summary row.
             </p>
