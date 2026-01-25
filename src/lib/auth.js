@@ -12,7 +12,7 @@ const AUTH_STORAGE_KEY = 'auth_user';
 /**
  * Validate credentials
  * Note: In Next.js, we need to access env vars on the server side
- * For client-side, we'll validate against hardcoded values (not ideal for production)
+ * For client-side, we'll validate against environment variables
  */
 export async function validateCredentials(username, password) {
   if (!username || !password) {
@@ -20,7 +20,8 @@ export async function validateCredentials(username, password) {
   }
 
   // Check admin credentials (always available)
-  if (username.toLowerCase() === 'admin' && password === 'bosslevel') {
+  const adminPassword = process.env.NEXT_PUBLIC_USER_ADMIN_PASSWORD || 'bosslevel';
+  if (username.toLowerCase() === 'admin' && password === adminPassword) {
     return { valid: true, role: 'admin' };
   }
 

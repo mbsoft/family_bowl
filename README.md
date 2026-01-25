@@ -94,7 +94,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ### 5. Initial Setup
 
-1. **Login as Admin**: Use username `admin` and password `bosslevel`
+1. **Login as Admin**
 2. **Create Bet Types**: Navigate to "Manage Bet Types" to define your bet types
 3. **Create Bets**: Navigate to "Manage Bets" to add prop bet questions
 4. **Generate Invites**: Navigate to "Manage Invites" to create invite links for users
@@ -176,7 +176,7 @@ The application will automatically:
 
 ## Authentication
 
-- **Admin**: Username `admin`, password `bosslevel` (hardcoded)
+- **Admin**: Username `admin`, password ``
 - **Users**: Credentials set via invite links, stored in database
 
 ## Key Features Explained
