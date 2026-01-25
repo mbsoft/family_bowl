@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import ProtectedRoute from '../../../components/ProtectedRoute';
-import { generateInvite, getInvites } from '../../../lib/storage';
+import { generateInvite, getInvites, deleteInvite } from '../../../lib/storage';
 
 export default function AdminInvitesPage() {
   const router = useRouter();
@@ -19,17 +19,30 @@ export default function AdminInvitesPage() {
     loadInvites();
   }, []);
 
-  const loadInvites = () => {
-    setInvites(getInvites());
+  const loadInvites = async () => {
+    try {
+      const loadedInvites = await getInvites();
+      setInvites(loadedInvites || []);
+    } catch (error) {
+      console.error('Failed to load invites:', error);
+      setInvites([]);
+    }
   };
 
-  const handleGenerateInvite = () => {
+  const handleGenerateInvite = async () => {
     const username = defaultUsername.trim() || null;
-    const newInvite = generateInvite(username);
-    if (newInvite) {
-      loadInvites();
-      setShowGenerateForm(false);
-      setDefaultUsername('');
+    try {
+      const newInvite = await generateInvite(username);
+      if (newInvite) {
+        await loadInvites();
+        setShowGenerateForm(false);
+        setDefaultUsername('');
+      } else {
+        alert('Failed to generate invite');
+      }
+    } catch (error) {
+      console.error('Failed to generate invite:', error);
+      alert('Failed to generate invite. Please try again.');
     }
   };
 
@@ -54,13 +67,34 @@ export default function AdminInvitesPage() {
     });
   };
 
+  const handleDeleteInvite = async (token) => {
+    const invite = Array.isArray(invites) ? invites.find(inv => inv.token === token) : null;
+    const message = invite?.used
+      ? `Are you sure you want to delete this used invite? This action cannot be undone.`
+      : `Are you sure you want to delete this invite? The link will no longer work and cannot be recovered.`;
+    
+    if (confirm(message)) {
+      try {
+        const success = await deleteInvite(token);
+        if (success) {
+          await loadInvites();
+        } else {
+          alert('Failed to delete invite');
+        }
+      } catch (error) {
+        console.error('Failed to delete invite:', error);
+        alert('Failed to delete invite. Please try again.');
+      }
+    }
+  };
+
   // Sort invites: unused first, then by creation date (newest first)
-  const sortedInvites = [...invites].sort((a, b) => {
+  const sortedInvites = Array.isArray(invites) ? [...invites].sort((a, b) => {
     if (a.used !== b.used) {
       return a.used ? 1 : -1;
     }
     return b.createdAt - a.createdAt;
-  });
+  }) : [];
 
   return (
     <ProtectedRoute requireAdmin={true}>
@@ -214,6 +248,15 @@ export default function AdminInvitesPage() {
                               </div>
                             </div>
                           )}
+                        </div>
+                        <div className="flex gap-2 ml-4">
+                          <button
+                            onClick={() => handleDeleteInvite(invite.token)}
+                            className="px-3 py-1 text-sm bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 rounded hover:bg-red-200 dark:hover:bg-red-800 transition-colors"
+                            title="Delete invite"
+                          >
+                            Delete
+                          </button>
                         </div>
                       </div>
                     </div>

@@ -19,21 +19,33 @@ export default function AdminDashboard() {
       return;
     }
 
-    setUsername(getCurrentUsername());
-    setBets(getBets());
-    setSubmissions(getAllSubmissions());
-    setPicksLockedState(arePicksLocked());
+    const loadData = async () => {
+      setUsername(getCurrentUsername());
+      const [betsData, submissionsData, locked] = await Promise.all([
+        getBets(),
+        getAllSubmissions(),
+        arePicksLocked()
+      ]);
+      setBets(betsData || []);
+      setSubmissions(submissionsData || []);
+      setPicksLockedState(locked || false);
+    };
+    loadData();
   }, []);
 
-  const handleToggleLock = () => {
+  const handleToggleLock = async () => {
     const newLockStatus = !picksLocked;
     if (confirm(
       newLockStatus
         ? 'Are you sure you want to LOCK all picks? Users will not be able to modify their submissions.'
         : 'Are you sure you want to UNLOCK all picks? Users will be able to modify their submissions again.'
     )) {
-      setPicksLocked(newLockStatus);
-      setPicksLockedState(newLockStatus);
+      const success = await setPicksLocked(newLockStatus);
+      if (success) {
+        setPicksLockedState(newLockStatus);
+      } else {
+        alert('Failed to update lock status. Please try again.');
+      }
     }
   };
 
@@ -129,6 +141,18 @@ export default function AdminDashboard() {
               </h2>
               <p className="text-gray-600 dark:text-gray-400">
                 Generate and manage invite links for new users.
+              </p>
+            </Link>
+
+            <Link
+              href="/admin/users"
+              className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 hover:shadow-lg transition-shadow"
+            >
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                Manage Users
+              </h2>
+              <p className="text-gray-600 dark:text-gray-400">
+                View and delete registered users.
               </p>
             </Link>
 

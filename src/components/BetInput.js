@@ -12,7 +12,16 @@ export default function BetInput({ bet, value, onChange, disabled = false }) {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      setBetTypes(getBetTypes());
+      const loadBetTypes = async () => {
+        try {
+          const types = await getBetTypes();
+          setBetTypes(types || []);
+        } catch (error) {
+          console.error('Failed to load bet types:', error);
+          setBetTypes([]);
+        }
+      };
+      loadBetTypes();
     }
   }, []);
 

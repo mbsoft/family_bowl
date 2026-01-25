@@ -14,7 +14,7 @@ const AUTH_STORAGE_KEY = 'auth_user';
  * Note: In Next.js, we need to access env vars on the server side
  * For client-side, we'll validate against hardcoded values (not ideal for production)
  */
-export function validateCredentials(username, password) {
+export async function validateCredentials(username, password) {
   if (!username || !password) {
     return { valid: false, role: null };
   }
@@ -26,7 +26,8 @@ export function validateCredentials(username, password) {
 
   // Check stored user credentials
   if (typeof window !== 'undefined') {
-    if (validateUserCredentials(username, password)) {
+    const isValid = await validateUserCredentials(username, password);
+    if (isValid) {
       return { valid: true, role: 'user', username };
     }
   }
@@ -37,8 +38,8 @@ export function validateCredentials(username, password) {
 /**
  * Login user and store auth state
  */
-export function login(username, password) {
-  const validation = validateCredentials(username, password);
+export async function login(username, password) {
+  const validation = await validateCredentials(username, password);
   if (validation.valid) {
     // Use the matched username from validation (preserves correct case)
     const authData = {

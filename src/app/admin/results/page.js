@@ -21,10 +21,19 @@ export default function AdminResultsPage() {
     if (typeof window === 'undefined') {
       return;
     }
-    setBets(getBets());
-    setBetTypes(getBetTypes());
-    setResults(getBetResults());
-    setPicksLocked(arePicksLocked());
+    const loadData = async () => {
+      const [betsData, betTypesData, resultsData, locked] = await Promise.all([
+        getBets(),
+        getBetTypes(),
+        getBetResults(),
+        arePicksLocked()
+      ]);
+      setBets(betsData);
+      setBetTypes(betTypesData);
+      setResults(resultsData);
+      setPicksLocked(locked);
+    };
+    loadData();
   }, []);
 
   const handleSetResult = (bet) => {
@@ -33,13 +42,14 @@ export default function AdminResultsPage() {
     setEditingBetId(bet.id);
   };
 
-  const handleSaveResult = (betId) => {
+  const handleSaveResult = async (betId) => {
     if (!resultValue.trim()) {
       alert('Please enter a result value');
       return;
     }
     
-    if (saveBetResult(betId, resultValue.trim())) {
+    const success = await saveBetResult(betId, resultValue.trim());
+    if (success) {
       const updatedResults = { ...results, [betId]: resultValue.trim() };
       setResults(updatedResults);
       setEditingBetId(null);
@@ -49,9 +59,10 @@ export default function AdminResultsPage() {
     }
   };
 
-  const handleDeleteResult = (betId) => {
+  const handleDeleteResult = async (betId) => {
     if (confirm('Are you sure you want to delete this result?')) {
-      if (deleteBetResult(betId)) {
+      const success = await deleteBetResult(betId);
+      if (success) {
         const updatedResults = { ...results };
         delete updatedResults[betId];
         setResults(updatedResults);

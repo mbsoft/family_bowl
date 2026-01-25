@@ -23,33 +23,73 @@ export default function AdminBetsPage() {
     if (typeof window === 'undefined') {
       return;
     }
-    setBets(getBets());
-    loadBetTypes();
+    const loadData = async () => {
+      try {
+        const [loadedBets, loadedTypes] = await Promise.all([
+          getBets(),
+          getBetTypes()
+        ]);
+        setBets(loadedBets || []);
+        
+        // Initialize with defaults if none exist
+        let types = loadedTypes || [];
+        if (types.length === 0) {
+          types = DEFAULT_BET_TYPES;
+          try {
+            await saveBetTypes(types);
+          } catch (saveError) {
+            console.error('Failed to save default bet types:', saveError);
+            // Continue with defaults even if save fails
+          }
+        }
+        setBetTypes(types);
+        
+        // Set default type if form is empty
+        if (types.length > 0 && !formData.type) {
+          setFormData(prev => ({ ...prev, type: types[0].id }));
+        }
+      } catch (error) {
+        console.error('Failed to load data:', error);
+        setBets([]);
+        setBetTypes(DEFAULT_BET_TYPES);
+      }
+    };
+    loadData();
   }, []);
 
-  const loadBetTypes = () => {
-    let types = getBetTypes();
-    // Initialize with defaults if none exist
-    if (types.length === 0) {
-      types = DEFAULT_BET_TYPES;
-      saveBetTypes(types);
-    }
-    setBetTypes(types);
-    // Set default type if form is empty
-    if (types.length > 0 && !formData.type) {
-      setFormData(prev => ({ ...prev, type: types[0].id }));
+  const loadBetTypes = async () => {
+    try {
+      let types = await getBetTypes();
+      // Initialize with defaults if none exist
+      if (!types || types.length === 0) {
+        types = DEFAULT_BET_TYPES;
+        try {
+          await saveBetTypes(types);
+        } catch (saveError) {
+          console.error('Failed to save default bet types:', saveError);
+          // Continue with defaults even if save fails
+        }
+      }
+      setBetTypes(types || []);
+      // Set default type if form is empty
+      if (types && types.length > 0 && !formData.type) {
+        setFormData(prev => ({ ...prev, type: types[0].id }));
+      }
+    } catch (error) {
+      console.error('Failed to load bet types:', error);
+      // Fallback to defaults on error
+      setBetTypes(DEFAULT_BET_TYPES);
     }
   };
 
-  const handleAdd = () => {
+  const handleAdd = async () => {
     // Reload bet types to ensure we have the latest
-    loadBetTypes();
-    const currentTypes = getBetTypes();
-    const defaultTypes = currentTypes.length > 0 ? currentTypes : DEFAULT_BET_TYPES;
+    await loadBetTypes();
+    const currentTypes = betTypes.length > 0 ? betTypes : DEFAULT_BET_TYPES;
     
     setFormData({
       question: '',
-      type: defaultTypes.length > 0 ? defaultTypes[0].id : '',
+      type: currentTypes.length > 0 ? currentTypes[0].id : '',
       teamNames: { option1: '', option2: '' }
     });
     setEditingBet(null);
@@ -66,31 +106,31 @@ export default function AdminBetsPage() {
     setShowAddForm(true);
   };
 
-  const handleDelete = (betId) => {
+  const handleDelete = async (betId) => {
     if (confirm('Are you sure you want to delete this bet?')) {
       const updatedBets = bets.filter(bet => bet.id !== betId);
       setBets(updatedBets);
-      saveBets(updatedBets);
+      await saveBets(updatedBets);
     }
   };
 
-  const handleMoveUp = (index) => {
+  const handleMoveUp = async (index) => {
     if (index === 0) return; // Already at the top
     const updatedBets = [...bets];
     [updatedBets[index - 1], updatedBets[index]] = [updatedBets[index], updatedBets[index - 1]];
     setBets(updatedBets);
-    saveBets(updatedBets);
+    await saveBets(updatedBets);
   };
 
-  const handleMoveDown = (index) => {
+  const handleMoveDown = async (index) => {
     if (index === bets.length - 1) return; // Already at the bottom
     const updatedBets = [...bets];
     [updatedBets[index], updatedBets[index + 1]] = [updatedBets[index + 1], updatedBets[index]];
     setBets(updatedBets);
-    saveBets(updatedBets);
+    await saveBets(updatedBets);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     let updatedBets;
 
@@ -102,7 +142,7 @@ export default function AdminBetsPage() {
               ...editingBet,
               question: formData.question,
               type: formData.type,
-              teamNames: formData.type === 'KC/PHL' ? formData.teamNames : undefined
+              teamNames: selectedBetType?.requiresTeamNames ? formData.teamNames : undefined
             }
           : bet
       );
@@ -112,13 +152,30 @@ export default function AdminBetsPage() {
         id: `bet-${Date.now()}`,
         question: formData.question,
         type: formData.type,
-        teamNames: formData.type === 'KC/PHL' ? formData.teamNames : undefined
+        teamNames: selectedBetType?.requiresTeamNames ? formData.teamNames : undefined,
+        createdAt: Date.now()
       };
       updatedBets = [...bets, newBet];
     }
 
-    setBets(updatedBets);
-    saveBets(updatedBets);
+    try {
+      setBets(updatedBets);
+      const success = await saveBets(updatedBets);
+      if (!success) {
+        alert('Failed to save bet. Please try again.');
+        // Revert the state change on failure
+        const reloadedBets = await getBets();
+        setBets(reloadedBets);
+        return;
+      }
+    } catch (error) {
+      console.error('Failed to save bet:', error);
+      alert('An error occurred while saving the bet. Please try again.');
+      // Revert the state change on error
+      const reloadedBets = await getBets();
+      setBets(reloadedBets);
+      return;
+    }
     setShowAddForm(false);
     setEditingBet(null);
     setFormData({
@@ -138,7 +195,7 @@ export default function AdminBetsPage() {
     });
   };
 
-  const selectedBetType = betTypes.find(bt => bt.id === formData.type);
+  const selectedBetType = Array.isArray(betTypes) ? betTypes.find(bt => bt.id === formData.type) : null;
 
   return (
     <ProtectedRoute requireAdmin={true}>
@@ -362,7 +419,7 @@ export default function AdminBetsPage() {
                             </h3>
                           </div>
                           <p className="text-sm text-gray-500 dark:text-gray-400">
-                            Type: {betTypes.find(t => t.id === bet.type)?.label || bet.type}
+                            Type: {Array.isArray(betTypes) ? betTypes.find(t => t.id === bet.type)?.label || bet.type : bet.type}
                             {bet.teamNames && (
                               <span className="ml-2">
                                 ({bet.teamNames.option1} / {bet.teamNames.option2})

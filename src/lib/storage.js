@@ -1,44 +1,63 @@
 'use client';
 
 /**
- * Storage utilities for managing bets and submissions in localStorage
+ * Storage utilities for managing data via Turso database API
  */
-
-const BETS_CONFIG_KEY = 'bets_config';
-const BET_TYPES_CONFIG_KEY = 'bet_types_config';
-const SUBMISSION_PREFIX = 'submission_';
-const PICKS_LOCKED_KEY = 'picks_locked';
-const INVITES_CONFIG_KEY = 'invites_config';
-const USER_CREDENTIALS_KEY = 'user_credentials';
-const BET_RESULTS_KEY = 'bet_results';
 
 /**
- * Get all bet definitions from localStorage
+ * Helper function to call database API
  */
-export function getBets() {
-  if (typeof window === 'undefined') {
-    return [];
-  }
-  const betsJson = localStorage.getItem(BETS_CONFIG_KEY);
-  if (!betsJson) {
-    return [];
-  }
+async function dbCall(action, params = {}) {
   try {
-    return JSON.parse(betsJson);
+    const response = await fetch('/api/db', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ action, ...params }),
+    });
+
+    if (!response.ok) {
+      // Try to get error details from response
+      let errorMessage = response.statusText;
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.error || errorData.message || response.statusText;
+        if (errorData.details) {
+          console.error('API error details:', errorData.details);
+        }
+      } catch (e) {
+        // If we can't parse the error, use status text
+      }
+      throw new Error(`API call failed: ${errorMessage}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error(`Database API error (${action}):`, error);
+    console.error('Action:', action, 'Params:', params);
+    throw error;
+  }
+}
+
+/**
+ * Get all bet definitions
+ */
+export async function getBets() {
+  try {
+    return await dbCall('getBets');
   } catch (e) {
+    console.error('Failed to get bets:', e);
     return [];
   }
 }
 
 /**
- * Save bet definitions to localStorage
+ * Save bet definitions
  */
-export function saveBets(bets) {
-  if (typeof window === 'undefined') {
-    return false;
-  }
+export async function saveBets(bets) {
   try {
-    localStorage.setItem(BETS_CONFIG_KEY, JSON.stringify(bets));
+    await dbCall('saveBets', { bets });
     return true;
   } catch (e) {
     console.error('Failed to save bets:', e);
@@ -49,17 +68,14 @@ export function saveBets(bets) {
 /**
  * Get a user's submission
  */
-export function getSubmission(username) {
-  if (typeof window === 'undefined' || !username) {
-    return null;
-  }
-  const submissionJson = localStorage.getItem(`${SUBMISSION_PREFIX}${username}`);
-  if (!submissionJson) {
+export async function getSubmission(username) {
+  if (!username) {
     return null;
   }
   try {
-    return JSON.parse(submissionJson);
+    return await dbCall('getSubmission', { username });
   } catch (e) {
+    console.error('Failed to get submission:', e);
     return null;
   }
 }
@@ -67,20 +83,12 @@ export function getSubmission(username) {
 /**
  * Save or update a user's submission
  */
-export function saveSubmission(submission) {
-  if (typeof window === 'undefined' || !submission || !submission.username) {
+export async function saveSubmission(submission) {
+  if (!submission || !submission.username) {
     return false;
   }
   try {
-    const submissionData = {
-      username: submission.username,
-      timestamp: submission.timestamp || Date.now(),
-      selections: submission.selections || {}
-    };
-    localStorage.setItem(
-      `${SUBMISSION_PREFIX}${submission.username}`,
-      JSON.stringify(submissionData)
-    );
+    await dbCall('saveSubmission', { submission });
     return true;
   } catch (e) {
     console.error('Failed to save submission:', e);
@@ -91,37 +99,24 @@ export function saveSubmission(submission) {
 /**
  * Get all submissions (admin only)
  */
-export function getAllSubmissions() {
-  if (typeof window === 'undefined') {
-    return [];
-  }
-  const submissions = [];
+export async function getAllSubmissions() {
   try {
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && key.startsWith(SUBMISSION_PREFIX)) {
-        const username = key.replace(SUBMISSION_PREFIX, '');
-        const submission = getSubmission(username);
-        if (submission) {
-          submissions.push(submission);
-        }
-      }
-    }
+    return await dbCall('getAllSubmissions');
   } catch (e) {
     console.error('Failed to get all submissions:', e);
+    return [];
   }
-  return submissions;
 }
 
 /**
  * Delete a submission (admin only)
  */
-export function deleteSubmission(username) {
-  if (typeof window === 'undefined' || !username) {
+export async function deleteSubmission(username) {
+  if (!username) {
     return false;
   }
   try {
-    localStorage.removeItem(`${SUBMISSION_PREFIX}${username}`);
+    await dbCall('deleteSubmission', { username });
     return true;
   } catch (e) {
     console.error('Failed to delete submission:', e);
@@ -130,32 +125,23 @@ export function deleteSubmission(username) {
 }
 
 /**
- * Get all bet type definitions from localStorage
+ * Get all bet type definitions
  */
-export function getBetTypes() {
-  if (typeof window === 'undefined') {
-    return [];
-  }
-  const betTypesJson = localStorage.getItem(BET_TYPES_CONFIG_KEY);
-  if (!betTypesJson) {
-    return [];
-  }
+export async function getBetTypes() {
   try {
-    return JSON.parse(betTypesJson);
+    return await dbCall('getBetTypes');
   } catch (e) {
+    console.error('Failed to get bet types:', e);
     return [];
   }
 }
 
 /**
- * Save bet type definitions to localStorage
+ * Save bet type definitions
  */
-export function saveBetTypes(betTypes) {
-  if (typeof window === 'undefined') {
-    return false;
-  }
+export async function saveBetTypes(betTypes) {
   try {
-    localStorage.setItem(BET_TYPES_CONFIG_KEY, JSON.stringify(betTypes));
+    await dbCall('saveBetTypes', { betTypes });
     return true;
   } catch (e) {
     console.error('Failed to save bet types:', e);
@@ -166,23 +152,21 @@ export function saveBetTypes(betTypes) {
 /**
  * Check if picks are locked
  */
-export function arePicksLocked() {
-  if (typeof window === 'undefined') {
+export async function arePicksLocked() {
+  try {
+    return await dbCall('arePicksLocked');
+  } catch (e) {
+    console.error('Failed to check picks lock status:', e);
     return false;
   }
-  const locked = localStorage.getItem(PICKS_LOCKED_KEY);
-  return locked === 'true';
 }
 
 /**
  * Set picks lock status (admin only)
  */
-export function setPicksLocked(locked) {
-  if (typeof window === 'undefined') {
-    return false;
-  }
+export async function setPicksLocked(locked) {
   try {
-    localStorage.setItem(PICKS_LOCKED_KEY, locked ? 'true' : 'false');
+    await dbCall('setPicksLocked', { locked });
     return true;
   } catch (e) {
     console.error('Failed to set picks lock status:', e);
@@ -191,32 +175,12 @@ export function setPicksLocked(locked) {
 }
 
 /**
- * Generate a unique invite token
- */
-function generateInviteToken() {
-  return `invite-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
-}
-
-/**
  * Generate a new invite
  * @param {string} username - Optional default username to encode in the invite
  */
-export function generateInvite(username = null) {
-  if (typeof window === 'undefined') {
-    return null;
-  }
+export async function generateInvite(username = null) {
   try {
-    const invites = getInvites();
-    const newInvite = {
-      token: generateInviteToken(),
-      createdAt: Date.now(),
-      used: false,
-      usedBy: null,
-      defaultUsername: username || null
-    };
-    invites.push(newInvite);
-    localStorage.setItem(INVITES_CONFIG_KEY, JSON.stringify(invites));
-    return newInvite;
+    return await dbCall('generateInvite', { defaultUsername: username });
   } catch (e) {
     console.error('Failed to generate invite:', e);
     return null;
@@ -226,17 +190,11 @@ export function generateInvite(username = null) {
 /**
  * Get all invites
  */
-export function getInvites() {
-  if (typeof window === 'undefined') {
-    return [];
-  }
-  const invitesJson = localStorage.getItem(INVITES_CONFIG_KEY);
-  if (!invitesJson) {
-    return [];
-  }
+export async function getInvites() {
   try {
-    return JSON.parse(invitesJson);
+    return await dbCall('getInvites');
   } catch (e) {
+    console.error('Failed to get invites:', e);
     return [];
   }
 }
@@ -244,29 +202,27 @@ export function getInvites() {
 /**
  * Get invite by token
  */
-export function getInviteByToken(token) {
-  if (typeof window === 'undefined' || !token) {
+export async function getInviteByToken(token) {
+  if (!token) {
     return null;
   }
-  const invites = getInvites();
-  return invites.find(invite => invite.token === token) || null;
+  try {
+    return await dbCall('getInviteByToken', { token });
+  } catch (e) {
+    console.error('Failed to get invite by token:', e);
+    return null;
+  }
 }
 
 /**
  * Mark invite as used
  */
-export function markInviteUsed(token, username) {
-  if (typeof window === 'undefined' || !token || !username) {
+export async function markInviteUsed(token, username) {
+  if (!token || !username) {
     return false;
   }
   try {
-    const invites = getInvites();
-    const updatedInvites = invites.map(invite =>
-      invite.token === token
-        ? { ...invite, used: true, usedBy: username }
-        : invite
-    );
-    localStorage.setItem(INVITES_CONFIG_KEY, JSON.stringify(updatedInvites));
+    await dbCall('markInviteUsed', { token, username });
     return true;
   } catch (e) {
     console.error('Failed to mark invite as used:', e);
@@ -275,19 +231,29 @@ export function markInviteUsed(token, username) {
 }
 
 /**
- * Get all user credentials
+ * Delete an invite
  */
-export function getUserCredentials() {
-  if (typeof window === 'undefined') {
-    return {};
-  }
-  const credentialsJson = localStorage.getItem(USER_CREDENTIALS_KEY);
-  if (!credentialsJson) {
-    return {};
+export async function deleteInvite(token) {
+  if (!token) {
+    return false;
   }
   try {
-    return JSON.parse(credentialsJson);
+    await dbCall('deleteInvite', { token });
+    return true;
   } catch (e) {
+    console.error('Failed to delete invite:', e);
+    return false;
+  }
+}
+
+/**
+ * Get all user credentials
+ */
+export async function getUserCredentials() {
+  try {
+    return await dbCall('getUserCredentials');
+  } catch (e) {
+    console.error('Failed to get user credentials:', e);
     return {};
   }
 }
@@ -295,27 +261,13 @@ export function getUserCredentials() {
 /**
  * Save user credentials
  */
-export function saveUserCredentials(username, password, inviteToken) {
-  if (typeof window === 'undefined' || !username || !password) {
-    return false;
+export async function saveUserCredentials(username, password, inviteToken) {
+  if (!username || !password) {
+    return { success: false, error: 'Username and password are required' };
   }
   try {
-    const credentials = getUserCredentials();
-    
-    // Check if username already exists
-    if (credentials[username]) {
-      return { success: false, error: 'Username already exists' };
-    }
-
-    credentials[username] = {
-      username,
-      password, // Stored as-is (client-side only)
-      createdAt: Date.now(),
-      createdVia: inviteToken || null
-    };
-
-    localStorage.setItem(USER_CREDENTIALS_KEY, JSON.stringify(credentials));
-    return { success: true };
+    const result = await dbCall('saveUserCredentials', { username, password, inviteToken });
+    return result;
   } catch (e) {
     console.error('Failed to save user credentials:', e);
     return { success: false, error: 'Failed to save credentials' };
@@ -325,35 +277,42 @@ export function saveUserCredentials(username, password, inviteToken) {
 /**
  * Validate user credentials
  */
-export function validateUserCredentials(username, password) {
-  if (typeof window === 'undefined' || !username || !password) {
+export async function validateUserCredentials(username, password) {
+  if (!username || !password) {
     return false;
   }
-  const credentials = getUserCredentials();
-  const userCreds = credentials[username];
-  
-  if (!userCreds) {
+  try {
+    return await dbCall('validateUserCredentials', { username, password });
+  } catch (e) {
+    console.error('Failed to validate user credentials:', e);
     return false;
   }
+}
 
-  return userCreds.password === password;
+/**
+ * Delete a user
+ */
+export async function deleteUser(username) {
+  if (!username) {
+    return false;
+  }
+  try {
+    const result = await dbCall('deleteUser', { username });
+    return result?.success || false;
+  } catch (e) {
+    console.error('Failed to delete user:', e);
+    return false;
+  }
 }
 
 /**
  * Get all bet results
  */
-export function getBetResults() {
-  if (typeof window === 'undefined') {
-    return {};
-  }
-  const resultsJson = localStorage.getItem(BET_RESULTS_KEY);
-  if (!resultsJson) {
-    return {};
-  }
+export async function getBetResults() {
   try {
-    return JSON.parse(resultsJson);
+    return await dbCall('getBetResults');
   } catch (e) {
-    console.error('Failed to parse bet results:', e);
+    console.error('Failed to get bet results:', e);
     return {};
   }
 }
@@ -361,25 +320,27 @@ export function getBetResults() {
 /**
  * Get result for a specific bet
  */
-export function getBetResult(betId) {
-  if (typeof window === 'undefined' || !betId) {
+export async function getBetResult(betId) {
+  if (!betId) {
     return null;
   }
-  const results = getBetResults();
-  return results[betId] || null;
+  try {
+    return await dbCall('getBetResult', { betId });
+  } catch (e) {
+    console.error('Failed to get bet result:', e);
+    return null;
+  }
 }
 
 /**
  * Save bet result
  */
-export function saveBetResult(betId, result) {
-  if (typeof window === 'undefined' || !betId || !result) {
+export async function saveBetResult(betId, result) {
+  if (!betId || !result) {
     return false;
   }
   try {
-    const results = getBetResults();
-    results[betId] = result;
-    localStorage.setItem(BET_RESULTS_KEY, JSON.stringify(results));
+    await dbCall('saveBetResult', { betId, result });
     return true;
   } catch (e) {
     console.error('Failed to save bet result:', e);
@@ -390,18 +351,15 @@ export function saveBetResult(betId, result) {
 /**
  * Delete bet result
  */
-export function deleteBetResult(betId) {
-  if (typeof window === 'undefined' || !betId) {
+export async function deleteBetResult(betId) {
+  if (!betId) {
     return false;
   }
   try {
-    const results = getBetResults();
-    delete results[betId];
-    localStorage.setItem(BET_RESULTS_KEY, JSON.stringify(results));
+    await dbCall('deleteBetResult', { betId });
     return true;
   } catch (e) {
     console.error('Failed to delete bet result:', e);
     return false;
   }
 }
-

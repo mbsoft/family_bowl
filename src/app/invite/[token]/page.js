@@ -8,7 +8,9 @@ import { getUserCredentials } from '../../../lib/storage';
 export default function InvitePage() {
   const router = useRouter();
   const params = useParams();
-  const token = params?.token;
+  // Decode the token from URL to handle URL encoding issues on mobile browsers
+  const rawToken = params?.token;
+  const token = rawToken ? decodeURIComponent(String(rawToken)) : null;
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -17,34 +19,116 @@ export default function InvitePage() {
   const [loading, setLoading] = useState(true);
   const [inviteValid, setInviteValid] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [validToken, setValidToken] = useState(null);
 
   useEffect(() => {
-    if (typeof window === 'undefined' || !token) {
+    if (typeof window === 'undefined') {
       setLoading(false);
       return;
     }
 
-    // Check if invite is valid
-    const invite = getInviteByToken(token);
-    if (!invite) {
-      setError('Invalid invite link');
+    // Function to clean and normalize token (handles URL encoding, query params, etc.)
+    const cleanToken = (rawToken) => {
+      if (!rawToken) return null;
+      
+      // Remove any query parameters or fragments
+      let cleaned = String(rawToken).split('?')[0].split('#')[0];
+      
+      // Try to decode URL encoding
+      try {
+        cleaned = decodeURIComponent(cleaned);
+      } catch (e) {
+        // If decoding fails, try without the problematic characters
+        try {
+          cleaned = decodeURI(cleaned);
+        } catch (e2) {
+          // Use as-is if all decoding fails
+        }
+      }
+      
+      return cleaned.trim();
+    };
+
+    // Function to validate and process invite token
+    const validateInvite = async (inviteToken) => {
+      if (!inviteToken) {
+        return null;
+      }
+      
+      const cleanedToken = cleanToken(inviteToken);
+      if (!cleanedToken) {
+        return null;
+      }
+
+      // Check if invite is valid
+      const invite = await getInviteByToken(cleanedToken);
+      return invite ? { invite, token: cleanedToken } : null;
+    };
+
+    // Try multiple methods to extract the token
+    const loadInvite = async () => {
+      let result = null;
+      
+      // Method 1: Use token from Next.js params
+      if (token) {
+        result = await validateInvite(token);
+      }
+
+      // Method 2: Extract from URL pathname (handles cases where params don't work)
+      if (!result && typeof window !== 'undefined') {
+        const pathParts = window.location.pathname.split('/');
+        const urlToken = pathParts[pathParts.length - 1];
+        if (urlToken && urlToken !== 'invite' && urlToken !== '') {
+          result = await validateInvite(urlToken);
+        }
+      }
+
+      // Method 3: Extract from full URL (handles messaging app URL modifications)
+      if (!result && typeof window !== 'undefined') {
+        const fullUrl = window.location.href;
+        // Try to find the token in the URL
+        const inviteMatch = fullUrl.match(/\/invite\/([^/?&#]+)/);
+        if (inviteMatch && inviteMatch[1]) {
+          result = await validateInvite(inviteMatch[1]);
+        }
+      }
+
+      // Method 4: Try the hash or query params (some apps add these)
+      if (!result && typeof window !== 'undefined') {
+        const urlParams = new URLSearchParams(window.location.search);
+        const hashToken = window.location.hash.replace('#', '');
+        if (hashToken) {
+          result = await validateInvite(hashToken);
+        }
+      }
+
+      if (!result || !result.invite) {
+        setError('Invalid invite link');
+        setLoading(false);
+        return;
+      }
+
+      const { invite, token: validToken } = result;
+
+      if (invite.used) {
+        setError('This invite link has already been used');
+        setLoading(false);
+        return;
+      }
+
+      // Pre-fill username if provided in invite
+      if (invite.defaultUsername) {
+        setUsername(invite.defaultUsername);
+      }
+
+      // Store the valid token for use in submit
+      setValidToken(validToken);
+
+      setInviteValid(true);
       setLoading(false);
-      return;
-    }
+    };
 
-    if (invite.used) {
-      setError('This invite link has already been used');
-      setLoading(false);
-      return;
-    }
-
-    // Pre-fill username if provided in invite
-    if (invite.defaultUsername) {
-      setUsername(invite.defaultUsername);
-    }
-
-    setInviteValid(true);
-    setLoading(false);
+    loadInvite();
   }, [token]);
 
   const handleSubmit = async (e) => {
@@ -78,28 +162,44 @@ export default function InvitePage() {
     }
 
     // Check if username already exists
-    const credentials = getUserCredentials();
-    if (credentials[username.trim()]) {
+    const credentials = await getUserCredentials();
+    if (credentials && credentials[username.trim()]) {
       setError('Username already exists. Please choose a different username.');
+      setSubmitting(false);
       return;
     }
 
     setSubmitting(true);
 
-    // Save credentials
-    const result = saveUserCredentials(username.trim(), password, token);
-    
-    if (!result.success) {
-      setError(result.error || 'Failed to create account');
+    // Use the stored valid token
+    if (!validToken) {
+      setError('Invalid invite token. Please refresh the page and try again.');
       setSubmitting(false);
       return;
     }
+    
+    const tokenToUse = validToken;
 
-    // Mark invite as used
-    markInviteUsed(token, username.trim());
+    try {
+      // Save credentials
+      const result = await saveUserCredentials(username.trim(), password, tokenToUse);
+      
+      if (!result || !result.success) {
+        setError(result?.error || 'Failed to create account');
+        setSubmitting(false);
+        return;
+      }
 
-    // Redirect to login
-    router.push('/login?registered=true');
+      // Mark invite as used
+      await markInviteUsed(tokenToUse, username.trim());
+
+      // Redirect to login
+      router.push('/login?registered=true');
+    } catch (error) {
+      console.error('Error creating account:', error);
+      setError('Failed to create account. Please try again.');
+      setSubmitting(false);
+    }
   };
 
   if (loading) {

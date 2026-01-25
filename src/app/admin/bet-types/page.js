@@ -29,14 +29,20 @@ export default function AdminBetTypesPage() {
     loadBetTypes();
   }, []);
 
-  const loadBetTypes = () => {
-    let loaded = getBetTypes();
-    if (loaded.length === 0) {
-      // Initialize with defaults if none exist
-      loaded = DEFAULT_BET_TYPES;
-      saveBetTypes(loaded);
+  const loadBetTypes = async () => {
+    try {
+      let loaded = await getBetTypes();
+      if (!loaded || loaded.length === 0) {
+        // Initialize with defaults if none exist
+        loaded = DEFAULT_BET_TYPES;
+        await saveBetTypes(loaded);
+      }
+      setBetTypes(loaded || []);
+    } catch (error) {
+      console.error('Error loading bet types:', error);
+      // Fallback to defaults on error
+      setBetTypes(DEFAULT_BET_TYPES);
     }
-    setBetTypes(loaded);
   };
 
   const handleAdd = () => {
@@ -69,11 +75,18 @@ export default function AdminBetTypesPage() {
     setShowAddForm(true);
   };
 
-  const handleDelete = (betTypeId) => {
+  const handleDelete = async (betTypeId) => {
     if (confirm('Are you sure you want to delete this bet type? This may affect existing bets using this type.')) {
       const updated = betTypes.filter(bt => bt.id !== betTypeId);
       setBetTypes(updated);
-      saveBetTypes(updated);
+      try {
+        await saveBetTypes(updated);
+      } catch (error) {
+        console.error('Error deleting bet type:', error);
+        alert('Failed to delete bet type. Please try again.');
+        // Reload to restore state
+        loadBetTypes();
+      }
     }
   };
 
@@ -134,7 +147,7 @@ export default function AdminBetTypesPage() {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     // Validate
@@ -205,19 +218,26 @@ export default function AdminBetTypesPage() {
     }
 
     setBetTypes(updated);
-    saveBetTypes(updated);
-    setShowAddForm(false);
-    setEditingBetType(null);
-    setFormData({
-      id: '',
-      label: '',
-      options: ['', ''],
-      optionLabels: {},
-      requiresTeamNames: false,
-      isIntegerRange: false,
-      minValue: 0,
-      maxValue: 100
-    });
+    try {
+      await saveBetTypes(updated);
+      setShowAddForm(false);
+      setEditingBetType(null);
+      setFormData({
+        id: '',
+        label: '',
+        options: ['', ''],
+        optionLabels: {},
+        requiresTeamNames: false,
+        isIntegerRange: false,
+        minValue: 0,
+        maxValue: 100
+      });
+    } catch (error) {
+      console.error('Error saving bet type:', error);
+      alert('Failed to save bet type. Please try again.');
+      // Reload to restore state
+      loadBetTypes();
+    }
   };
 
   const handleCancel = () => {

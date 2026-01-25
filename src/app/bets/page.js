@@ -33,27 +33,36 @@ export default function BetsPage() {
     const currentUser = getCurrentUsername();
     setUsername(currentUser);
 
-    // Check if picks are locked
-    setPicksLocked(arePicksLocked());
+    // Load data asynchronously
+    const loadData = async () => {
+      try {
+        // Load bets, picks lock status, and submission in parallel
+        const [loadedBets, locked, existingSubmission] = await Promise.all([
+          getBets(),
+          arePicksLocked(),
+          currentUser ? getSubmission(currentUser) : Promise.resolve(null)
+        ]);
 
-    // Load bets
-    let loadedBets = getBets();
-    if (loadedBets.length === 0) {
-      // Initialize with default bets if none exist
-      loadedBets = DEFAULT_BETS;
-      // Note: We don't save defaults automatically - admin should configure
-    }
-    setBets(loadedBets);
+        setPicksLocked(locked);
 
-    // Load existing submission if any
-    if (currentUser) {
-      const existingSubmission = getSubmission(currentUser);
-      if (existingSubmission && existingSubmission.selections) {
-        setSelections(existingSubmission.selections);
+        // Use loaded bets or defaults
+        const betsToUse = loadedBets && loadedBets.length > 0 ? loadedBets : DEFAULT_BETS;
+        setBets(betsToUse);
+
+        // Load existing submission if any
+        if (existingSubmission && existingSubmission.selections) {
+          setSelections(existingSubmission.selections);
+        }
+      } catch (error) {
+        console.error('Failed to load data:', error);
+        // Fallback to defaults on error
+        setBets(DEFAULT_BETS);
+      } finally {
+        setLoading(false);
       }
-    }
+    };
 
-    setLoading(false);
+    loadData();
   }, [router]);
 
   const handleSelectionChange = (betId, value) => {
@@ -86,13 +95,20 @@ export default function BetsPage() {
       selections
     };
 
-    const success = saveSubmission(submission);
-    setSubmitting(false);
-
-    if (success) {
-      setSubmitted(true);
-      // Scroll to top to show success message
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    try {
+      const success = await saveSubmission(submission);
+      if (success) {
+        setSubmitted(true);
+        // Scroll to top to show success message
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        alert('Failed to save submission. Please try again.');
+      }
+    } catch (error) {
+      console.error('Failed to save submission:', error);
+      alert('An error occurred while saving. Please try again.');
+    } finally {
+      setSubmitting(false);
     }
   };
 

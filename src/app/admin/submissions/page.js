@@ -23,10 +23,22 @@ export default function AdminSubmissionsPage() {
     loadData();
   }, []);
 
-  const loadData = () => {
-    setSubmissions(getAllSubmissions());
-    setBets(getBets());
-    setBetTypes(getBetTypes());
+  const loadData = async () => {
+    try {
+      const [submissionsData, betsData, betTypesData] = await Promise.all([
+        getAllSubmissions(),
+        getBets(),
+        getBetTypes()
+      ]);
+      setSubmissions(submissionsData || []);
+      setBets(betsData || []);
+      setBetTypes(betTypesData || []);
+    } catch (error) {
+      console.error('Error loading data:', error);
+      setSubmissions([]);
+      setBets([]);
+      setBetTypes([]);
+    }
   };
 
   const handleEdit = (submission) => {
@@ -41,7 +53,7 @@ export default function AdminSubmissionsPage() {
     }));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!editingSubmission) return;
 
     const updatedSubmission = {
@@ -50,10 +62,19 @@ export default function AdminSubmissionsPage() {
       timestamp: Date.now()
     };
 
-    saveSubmission(updatedSubmission);
-    loadData();
-    setEditingSubmission(null);
-    setEditingSelections({});
+    try {
+      const success = await saveSubmission(updatedSubmission);
+      if (success) {
+        await loadData();
+        setEditingSubmission(null);
+        setEditingSelections({});
+      } else {
+        alert('Failed to save submission. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error saving submission:', error);
+      alert('Failed to save submission. Please try again.');
+    }
   };
 
   const handleCancel = () => {
@@ -61,25 +82,32 @@ export default function AdminSubmissionsPage() {
     setEditingSelections({});
   };
 
-  const handleDelete = (submission) => {
+  const handleDelete = async (submission) => {
     if (confirm(`Are you sure you want to delete the submission for ${submission.username}? This action cannot be undone.`)) {
-      const success = deleteSubmission(submission.username);
-      if (success) {
-        loadData();
-        // If we were editing this submission, cancel editing
-        if (editingSubmission?.username === submission.username) {
-          setEditingSubmission(null);
-          setEditingSelections({});
+      try {
+        const success = await deleteSubmission(submission.username);
+        if (success) {
+          await loadData();
+          // If we were editing this submission, cancel editing
+          if (editingSubmission?.username === submission.username) {
+            setEditingSubmission(null);
+            setEditingSelections({});
+          }
+        } else {
+          alert('Failed to delete submission. Please try again.');
         }
-      } else {
+      } catch (error) {
+        console.error('Error deleting submission:', error);
         alert('Failed to delete submission. Please try again.');
       }
     }
   };
 
-  const filteredSubmissions = submissions.filter((submission) =>
-    submission.username.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredSubmissions = Array.isArray(submissions) 
+    ? submissions.filter((submission) =>
+        submission.username.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : [];
 
   return (
     <ProtectedRoute requireAdmin={true}>

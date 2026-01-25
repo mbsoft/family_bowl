@@ -37,7 +37,8 @@ export default function LoginPage() {
     setError('');
     setLoading(true);
 
-    const result = login(username, password);
+    try {
+      const result = await login(username, password);
 
     if (result.success) {
       // Redirect based on role
@@ -48,6 +49,10 @@ export default function LoginPage() {
       }
     } else {
       setError(result.error || 'Invalid credentials');
+      setLoading(false);
+    }
+    } catch (error) {
+      setError('An error occurred. Please try again.');
       setLoading(false);
     }
   };
