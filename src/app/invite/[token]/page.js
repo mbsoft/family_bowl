@@ -215,6 +215,13 @@ export default function InvitePage() {
       <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black px-4">
         <div className="w-full max-w-md">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
+            <div className="flex justify-center mb-4">
+              <img 
+                src="/logo.webp" 
+                alt="Family Bowl Logo" 
+                className="h-16 w-auto"
+              />
+            </div>
             <h1 className="text-2xl font-bold text-center mb-4 text-gray-900 dark:text-white">
               Invalid Invite Link
             </h1>
@@ -237,6 +244,13 @@ export default function InvitePage() {
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black px-4">
       <div className="w-full max-w-md">
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
+          <div className="flex justify-center mb-4">
+            <img 
+              src="/logo.webp" 
+              alt="Family Bowl Logo" 
+              className="h-16 w-auto"
+            />
+          </div>
           <h1 className="text-3xl font-bold text-center mb-2 text-gray-900 dark:text-white">
             Create Your Account
           </h1>

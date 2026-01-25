@@ -126,13 +126,20 @@ export default function BetsPage() {
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 sm:p-8">
           <div className="mb-6 sm:mb-8">
             <div className="flex items-start justify-between gap-4">
-              <div className="flex-1">
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                  Super Bowl Prop Bets
-                </h1>
-                <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
-                  Welcome, {username}! Make your selections below.
-                </p>
+              <div className="flex items-center gap-3 flex-1">
+                <img 
+                  src="/logo.webp" 
+                  alt="Family Bowl Logo" 
+                  className="h-10 sm:h-12 w-auto flex-shrink-0"
+                />
+                <div className="flex-1">
+                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                    Super Bowl Prop Bets
+                  </h1>
+                  <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
+                    Welcome, {username}! Make your selections below.
+                  </p>
+                </div>
               </div>
               <button
                 onClick={() => {

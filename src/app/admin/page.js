@@ -54,12 +54,21 @@ export default function AdminDashboard() {
       <div className="min-h-screen bg-zinc-50 dark:bg-black py-8 px-4">
         <div className="max-w-6xl mx-auto">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-              Admin Dashboard
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400">
-              Welcome, {username}! Manage bets and view submissions.
-            </p>
+            <div className="flex items-center gap-4 mb-4">
+              <img 
+                src="/logo.webp" 
+                alt="Family Bowl Logo" 
+                className="h-12 w-auto"
+              />
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                  Admin Dashboard
+                </h1>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Welcome, {username}! Manage bets and view submissions.
+                </p>
+              </div>
+            </div>
           </div>
 
           {/* Lock Status Banner */}
@@ -100,33 +109,38 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-              <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
-                Total Bets
-              </h3>
-              <p className="text-3xl font-bold text-gray-900 dark:text-white">
-                {bets.length}
-              </p>
-            </div>
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-              <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
-                Total Submissions
-              </h3>
-              <p className="text-3xl font-bold text-gray-900 dark:text-white">
-                {submissions.length}
-              </p>
-            </div>
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-              <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
-                Completion Rate
-              </h3>
-              <p className="text-3xl font-bold text-gray-900 dark:text-white">
-                {bets.length > 0
-                  ? `${Math.round((submissions.length / Math.max(1, 10)) * 100)}%`
-                  : '0%'}
-              </p>
+          {/* Stats Panel */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              Statistics
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+              <div className="text-center sm:text-left">
+                <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                  Total Bets
+                </h3>
+                <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                  {bets.length}
+                </p>
+              </div>
+              <div className="text-center sm:text-left border-t sm:border-t-0 sm:border-l border-gray-200 dark:border-gray-700 pt-4 sm:pt-0 sm:pl-6">
+                <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                  Total Submissions
+                </h3>
+                <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                  {submissions.length}
+                </p>
+              </div>
+              <div className="text-center sm:text-left border-t sm:border-t-0 sm:border-l border-gray-200 dark:border-gray-700 pt-4 sm:pt-0 sm:pl-6">
+                <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                  Completion Rate
+                </h3>
+                <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                  {bets.length > 0 && submissions.length > 0
+                    ? `${Math.round((submissions.length / bets.length) * 100)}%`
+                    : '0%'}
+                </p>
+              </div>
             </div>
           </div>
 

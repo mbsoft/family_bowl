@@ -216,15 +216,22 @@ export default function ViewPicksPage() {
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-4">
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                  All Picks
-                </h1>
-                <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
-                  {picksLocked 
-                    ? "View everyone's selections (picks are locked)"
-                    : "View everyone's selections"}
-                </p>
+              <div className="flex items-center gap-3">
+                <img 
+                  src="/logo.webp" 
+                  alt="Family Bowl Logo" 
+                  className="h-10 sm:h-12 w-auto flex-shrink-0"
+                />
+                <div>
+                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                    All Picks
+                  </h1>
+                  <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
+                    {picksLocked 
+                      ? "View everyone's selections (picks are locked)"
+                      : "View everyone's selections"}
+                  </p>
+                </div>
               </div>
               <div className="flex flex-col sm:flex-row gap-2">
                 <button
