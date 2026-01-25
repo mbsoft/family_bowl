@@ -16,14 +16,28 @@ export default function ViewPicksPage() {
   const [loading, setLoading] = useState(true);
   const [results, setResults] = useState({});
 
-  const loadData = () => {
+  const loadData = async () => {
     if (typeof window === 'undefined') {
       return;
     }
-    setSubmissions(getAllSubmissions());
-    setBets(getBets());
-    setBetTypes(getBetTypes());
-    setResults(getBetResults());
+    try {
+      const [submissionsData, betsData, betTypesData, resultsData] = await Promise.all([
+        getAllSubmissions(),
+        getBets(),
+        getBetTypes(),
+        getBetResults()
+      ]);
+      setSubmissions(Array.isArray(submissionsData) ? submissionsData : []);
+      setBets(Array.isArray(betsData) ? betsData : []);
+      setBetTypes(Array.isArray(betTypesData) ? betTypesData : []);
+      setResults(resultsData || {});
+    } catch (error) {
+      console.error('Error loading data:', error);
+      setSubmissions([]);
+      setBets([]);
+      setBetTypes([]);
+      setResults({});
+    }
   };
 
   useEffect(() => {
@@ -37,20 +51,30 @@ export default function ViewPicksPage() {
       return;
     }
 
-    // Check if picks are locked
-    const locked = arePicksLocked();
-    setPicksLocked(locked);
+    // Load data and check lock status
+    const initializeData = async () => {
+      try {
+        // Check if picks are locked
+        const locked = await arePicksLocked();
+        setPicksLocked(locked);
 
-    // If not locked and user is not admin, redirect to bets page
-    // Admins can always view the table
-    if (!locked && !isAdmin()) {
-      router.push('/bets');
-      return;
-    }
+        // If not locked and user is not admin, redirect to bets page
+        // Admins can always view the table
+        if (!locked && !isAdmin()) {
+          router.push('/bets');
+          return;
+        }
 
-    // Load data
-    loadData();
-    setLoading(false);
+        // Load data
+        await loadData();
+        setLoading(false);
+      } catch (error) {
+        console.error('Error initializing data:', error);
+        setLoading(false);
+      }
+    };
+
+    initializeData();
 
     // Refresh data when page becomes visible (user navigates back)
     const handleVisibilityChange = () => {
@@ -81,9 +105,11 @@ export default function ViewPicksPage() {
   }
 
   // Sort submissions alphabetically by username
-  const sortedSubmissions = [...submissions].sort((a, b) =>
-    a.username.localeCompare(b.username)
-  );
+  const sortedSubmissions = Array.isArray(submissions)
+    ? [...submissions].sort((a, b) =>
+        a.username.localeCompare(b.username)
+      )
+    : [];
 
   // Calculate points for each user
   const calculatePoints = (username) => {
@@ -119,32 +145,32 @@ export default function ViewPicksPage() {
     <div className="min-h-screen bg-zinc-50 dark:bg-black py-8 px-4">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
-          <div className="flex justify-between items-center mb-4">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                All Picks
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400">
-                {picksLocked 
-                  ? "View everyone's selections (picks are locked)"
-                  : "View everyone's selections"}
-              </p>
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-4">
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                  All Picks
+                </h1>
+                <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
+                  {picksLocked 
+                    ? "View everyone's selections (picks are locked)"
+                    : "View everyone's selections"}
+                </p>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <button
+                  onClick={() => loadData()}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium"
+                >
+                  Refresh
+                </button>
+                <button
+                  onClick={() => router.push(isAdmin() ? '/admin' : '/bets')}
+                  className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg text-sm font-medium border border-gray-300 dark:border-gray-600"
+                >
+                  {isAdmin() ? 'Back to Admin' : 'Back to My Picks'}
+                </button>
+              </div>
             </div>
-            <div className="flex gap-2">
-              <button
-                onClick={loadData}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm"
-              >
-                Refresh
-              </button>
-              <button
-                onClick={() => router.push(isAdmin() ? '/admin' : '/bets')}
-                className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
-              >
-                {isAdmin() ? 'Back to Admin Dashboard' : 'Back to My Picks'}
-              </button>
-            </div>
-          </div>
         </div>
 
         {sortedSubmissions.length === 0 ? (
@@ -157,13 +183,13 @@ export default function ViewPicksPage() {
               <table className="w-full min-w-full">
                 <thead className="bg-gray-50 dark:bg-gray-700 sticky top-0 z-20">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider sticky left-0 bg-gray-50 dark:bg-gray-700 z-30 border-r border-gray-200 dark:border-gray-600 shadow-[2px_0_4px_rgba(0,0,0,0.1)] min-w-[200px]">
+                    <th className="px-2 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider sticky left-0 bg-gray-50 dark:bg-gray-700 z-30 border-r border-gray-200 dark:border-gray-600 shadow-[2px_0_4px_rgba(0,0,0,0.1)] min-w-[150px] sm:min-w-[200px]">
                       Bet Question
                     </th>
                     {sortedSubmissions.map((submission) => (
                       <th
                         key={submission.username}
-                        className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider min-w-[120px]"
+                        className="px-2 sm:px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider min-w-[100px] sm:min-w-[120px]"
                       >
                         {submission.username}
                       </th>
@@ -195,11 +221,11 @@ export default function ViewPicksPage() {
                         key={bet.id}
                         className="hover:bg-gray-50 dark:hover:bg-gray-700/50"
                       >
-                        <td className="px-4 py-3 text-sm font-medium text-gray-900 dark:text-white sticky left-0 bg-white dark:bg-gray-800 z-10 border-r border-gray-200 dark:border-gray-600 shadow-[2px_0_4px_rgba(0,0,0,0.1)]">
-                          <div className="flex items-center gap-2">
-                            {bet.question}
+                        <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm font-medium text-gray-900 dark:text-white sticky left-0 bg-white dark:bg-gray-800 z-10 border-r border-gray-200 dark:border-gray-600 shadow-[2px_0_4px_rgba(0,0,0,0.1)]">
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                            <span className="break-words">{bet.question}</span>
                             {hasResult && (
-                              <span className="text-xs text-gray-500 dark:text-gray-400">
+                              <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
                                 (Result: {getBetOptionLabel(bet.type, results[bet.id], bet.teamNames, betTypes)})
                               </span>
                             )}
@@ -231,7 +257,7 @@ export default function ViewPicksPage() {
                           return (
                             <td
                               key={`${bet.id}-${submission.username}`}
-                              className={`px-4 py-3 text-sm whitespace-nowrap text-center ${bgColor} ${textColor}`}
+                              className={`px-2 sm:px-4 py-3 text-xs sm:text-sm whitespace-nowrap text-center ${bgColor} ${textColor}`}
                             >
                               {label}
                             </td>

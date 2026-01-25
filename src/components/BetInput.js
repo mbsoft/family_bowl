@@ -80,7 +80,7 @@ export default function BetInput({ bet, value, onChange, disabled = false }) {
           />
         </div>
       ) : (
-        <div className="flex flex-wrap gap-4">
+        <div className="flex flex-wrap gap-2 sm:gap-4">
           {options.map((option) => {
             const optionId = `${bet.id}-${option}`;
             const label = getBetOptionLabel(bet.type, option, bet.teamNames, betTypes);
@@ -91,7 +91,7 @@ export default function BetInput({ bet, value, onChange, disabled = false }) {
                 key={optionId}
                 htmlFor={optionId}
                 className={`
-                  flex items-center px-4 py-2 rounded-lg border-2 transition-colors
+                  flex items-center px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg border-2 transition-colors text-sm sm:text-base
                   ${
                     disabled
                       ? 'cursor-not-allowed opacity-60'
