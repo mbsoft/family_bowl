@@ -39,3 +39,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+scripts/import-2021-archive.js
+scripts/import-2022-archive.js
+scripts/import-2023-archive.js
+scripts/import-2024-archive.js
+scripts/import-2025-archive.js
+SuperBowl-PropBet-Tracker.xlsx
+Untitled spreadsheet (1).xlsx
+Untitled spreadsheet (2).xlsx
+Untitled spreadsheet (3).xlsx

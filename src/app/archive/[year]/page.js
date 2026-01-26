@@ -1,45 +1,20 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
-import { isAuthenticated, isAdmin } from '../../lib/auth';
-import { getAllSubmissions, getBets, arePicksLocked, getBetResults } from '../../lib/storage';
-import { getBetTypes } from '../../lib/storage';
-import { getBetOptionLabel } from '../../utils/constants';
+import { isAuthenticated, isAdmin } from '../../../lib/auth';
+import { getArchiveData } from '../../../lib/storage';
+import { getBetTypes } from '../../../lib/storage';
+import { getBetOptionLabel } from '../../../utils/constants';
 
-export default function ViewPicksPage() {
+export default function ArchivePage() {
   const router = useRouter();
-  const [submissions, setSubmissions] = useState([]);
-  const [bets, setBets] = useState([]);
+  const params = useParams();
+  const year = params?.year ? parseInt(params.year, 10) : null;
+  const [archiveData, setArchiveData] = useState(null);
   const [betTypes, setBetTypes] = useState([]);
-  const [picksLocked, setPicksLocked] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [results, setResults] = useState({});
-
-  const loadData = async () => {
-    if (typeof window === 'undefined') {
-      return;
-    }
-    try {
-      const [submissionsData, betsData, betTypesData, resultsData] = await Promise.all([
-        getAllSubmissions(),
-        getBets(),
-        getBetTypes(),
-        getBetResults()
-      ]);
-      setSubmissions(Array.isArray(submissionsData) ? submissionsData : []);
-      setBets(Array.isArray(betsData) ? betsData : []);
-      setBetTypes(Array.isArray(betTypesData) ? betTypesData : []);
-      setResults(resultsData || {});
-    } catch (error) {
-      console.error('Error loading data:', error);
-      setSubmissions([]);
-      setBets([]);
-      setBetTypes([]);
-      setResults({});
-    }
-  };
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -52,50 +27,36 @@ export default function ViewPicksPage() {
       return;
     }
 
-    // Load data and check lock status
-    const initializeData = async () => {
-      try {
-        // Check if picks are locked
-        const locked = await arePicksLocked();
-        setPicksLocked(locked);
+    if (!year || isNaN(year)) {
+      router.push('/bets');
+      return;
+    }
 
-        // If not locked and user is not admin, redirect to bets page
-        // Admins can always view the table
-        if (!locked && !isAdmin()) {
-          router.push('/bets');
-          return;
-        }
+    loadArchiveData();
+  }, [year, router]);
 
-        // Load data
-        await loadData();
-        setLoading(false);
-      } catch (error) {
-        console.error('Error initializing data:', error);
-        setLoading(false);
+  const loadArchiveData = async () => {
+    try {
+      const [data, types] = await Promise.all([
+        getArchiveData(year),
+        getBetTypes()
+      ]);
+
+      if (!data) {
+        // Archive doesn't exist, redirect
+        router.push('/bets');
+        return;
       }
-    };
 
-    initializeData();
-
-    // Refresh data when page becomes visible (user navigates back)
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        loadData();
-      }
-    };
-
-    // Refresh data periodically (every 2 seconds) to catch updates
-    const refreshInterval = setInterval(() => {
-      loadData();
-    }, 2000);
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    return () => {
-      clearInterval(refreshInterval);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, [router]);
+      setArchiveData(data);
+      setBetTypes(types || []);
+    } catch (error) {
+      console.error('Error loading archive data:', error);
+      router.push('/bets');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -105,15 +66,14 @@ export default function ViewPicksPage() {
     );
   }
 
-  // Sort submissions alphabetically by username
-  const sortedSubmissions = Array.isArray(submissions)
-    ? [...submissions].sort((a, b) =>
-        a.username.localeCompare(b.username)
-      )
-    : [];
+  if (!archiveData) {
+    return null;
+  }
 
-  // Calculate points for each user
-  const calculatePoints = (username) => {
+  const { bets, submissions, results } = archiveData;
+
+  // Calculate points for each user first (needed for sorting)
+  const calculatePointsForSorting = (username) => {
     let points = 0;
     bets.forEach((bet) => {
       const result = results[bet.id];
@@ -121,7 +81,6 @@ export default function ViewPicksPage() {
         const submission = submissions.find(s => s.username === username);
         if (submission && submission.selections[bet.id]) {
           const userSelection = submission.selections[bet.id];
-          // Compare values (trim whitespace and ensure exact match)
           if (String(userSelection).trim() === String(result).trim()) {
             points += 1;
           }
@@ -131,62 +90,40 @@ export default function ViewPicksPage() {
     return points;
   };
 
-  // Check if a user's pick is correct
-  const isCorrect = (betId, username) => {
-    const result = results[betId];
-    if (!result) return null; // No result set yet
-    const submission = submissions.find(s => s.username === username);
-    if (!submission || !submission.selections[betId]) return null; // No selection
-    const userSelection = submission.selections[betId];
-    // Compare values (trim whitespace and ensure exact match)
-    return String(userSelection).trim() === String(result).trim();
-  };
-
-  // Determine the winner
-  const determineWinner = () => {
-    // Only determine winner if bets are locked and all results are defined
-    if (!picksLocked) return null;
-    
-    // Check if all bets have results
-    const allBetsHaveResults = bets.length > 0 && bets.every(bet => results[bet.id]);
-    if (!allBetsHaveResults) return null;
-
-    // Calculate points for each user
-    const userPoints = sortedSubmissions.map(submission => ({
+  // Determine winner first
+  const determineWinnerForSorting = () => {
+    // Calculate points even if not all bets have results
+    const userPoints = submissions.map(submission => ({
       username: submission.username,
-      points: calculatePoints(submission.username)
+      points: calculatePointsForSorting(submission.username)
     }));
 
-    // Find the maximum points
-    const maxPoints = Math.max(...userPoints.map(u => u.points));
-    
-    // Find all users with max points
+    // If no one has any points, return null
+    const maxPoints = Math.max(...userPoints.map(u => u.points), 0);
+    if (maxPoints === 0) return null;
+
     const topUsers = userPoints.filter(u => u.points === maxPoints);
 
-    // If only one winner, return it
     if (topUsers.length === 1) {
       return topUsers[0].username;
     }
 
     // Tie-breaker logic
     if (topUsers.length > 1) {
-      // Find the tie breaker bet (question starts with "Tie Breaker")
       const tieBreakerBet = bets.find(bet => 
         bet.question.toLowerCase().startsWith('tie breaker')
       );
 
       if (!tieBreakerBet || !results[tieBreakerBet.id]) {
-        // No tie breaker or no result, return first user (alphabetical)
-        return topUsers[0].username;
+        // No tie-breaker, return first user alphabetically from tied users
+        return topUsers.sort((a, b) => a.username.localeCompare(b.username))[0].username;
       }
 
       const tieBreakerResult = parseInt(results[tieBreakerBet.id], 10);
       if (isNaN(tieBreakerResult)) {
-        // Tie breaker result is not a number, return first user
-        return topUsers[0].username;
+        return topUsers.sort((a, b) => a.username.localeCompare(b.username))[0].username;
       }
 
-      // Find the user with the closest answer to the tie breaker result
       let winner = topUsers[0].username;
       let closestDiff = Infinity;
 
@@ -210,56 +147,98 @@ export default function ViewPicksPage() {
     return null;
   };
 
-  const winner = determineWinner();
+  const winnerForSorting = determineWinnerForSorting();
+
+  // Sort submissions: winner first, then by descending point totals
+  const sortedSubmissions = Array.isArray(submissions)
+    ? [...submissions].sort((a, b) => {
+        // Winner always comes first
+        if (winnerForSorting) {
+          if (a.username === winnerForSorting) return -1;
+          if (b.username === winnerForSorting) return 1;
+        }
+        // Then sort by descending point totals
+        const pointsA = calculatePointsForSorting(a.username);
+        const pointsB = calculatePointsForSorting(b.username);
+        if (pointsB !== pointsA) {
+          return pointsB - pointsA; // Descending order
+        }
+        // If points are equal, sort alphabetically as tiebreaker
+        return a.username.localeCompare(b.username);
+      })
+    : [];
+
+  // Calculate points for each user
+  const calculatePoints = (username) => {
+    let points = 0;
+    bets.forEach((bet) => {
+      const result = results[bet.id];
+      if (result) {
+        const submission = submissions.find(s => s.username === username);
+        if (submission && submission.selections[bet.id]) {
+          const userSelection = submission.selections[bet.id];
+          if (String(userSelection).trim() === String(result).trim()) {
+            points += 1;
+          }
+        }
+      }
+    });
+    return points;
+  };
+
+  // Check if a user's pick is correct
+  const isCorrect = (betId, username) => {
+    const result = results[betId];
+    if (!result) return null;
+    const submission = submissions.find(s => s.username === username);
+    if (!submission || !submission.selections[betId]) return null;
+    const userSelection = submission.selections[betId];
+    return String(userSelection).trim() === String(result).trim();
+  };
+
+  // Use the winner determined for sorting
+  const winner = winnerForSorting;
 
   return (
     <div className="min-h-screen bg-[#F5F5F5] dark:bg-[#1A1A1A] py-8 px-4">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-4">
-              <div className="flex items-center gap-3">
-                <img 
-                  src="/logo.webp" 
-                  alt="Family Bowl Logo" 
-                  className="h-10 sm:h-12 w-auto flex-shrink-0 drop-shadow-lg"
-                />
-                <div>
-                  <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white mb-2 uppercase tracking-tight">
-                    All Picks
-                  </h1>
-                  <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300 font-semibold">
-                    {picksLocked 
-                      ? "View everyone's selections (picks are locked)"
-                      : "View everyone's selections"}
-                  </p>
-                </div>
-              </div>
-              <div className="flex flex-col sm:flex-row gap-2">
-                <button
-                  onClick={() => loadData()}
-                  className="px-5 py-3 bg-gradient-to-r from-[#0D4F3C] to-green-700 hover:from-green-700 hover:to-green-800 dark:from-green-600 dark:to-green-700 text-white rounded-xl text-sm font-black uppercase tracking-wider shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
-                >
-                  Refresh
-                </button>
-                <Link
-                  href="/archive"
-                  className="px-5 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl text-sm font-black uppercase tracking-wider shadow-lg hover:shadow-xl transform hover:scale-105 transition-all text-center"
-                >
-                  Archive
-                </Link>
-                <button
-                  onClick={() => router.push(isAdmin() ? '/admin' : '/bets')}
-                  className="px-5 py-3 text-gray-700 dark:text-gray-300 hover:text-[#0D4F3C] dark:hover:text-green-400 rounded-xl text-sm font-black uppercase tracking-wider border-4 border-gray-400 dark:border-gray-600 hover:border-[#0D4F3C] dark:hover:border-green-500 transition-all"
-                >
-                  {isAdmin() ? 'Back to Admin' : 'Back to My Picks'}
-                </button>
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-4">
+            <div className="flex items-center gap-3">
+              <img 
+                src="/logo.webp" 
+                alt="Family Bowl Logo" 
+                className="h-10 sm:h-12 w-auto flex-shrink-0 drop-shadow-lg"
+              />
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white mb-2 uppercase tracking-tight">
+                  {year} Archive
+                </h1>
+                <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300 font-semibold">
+                  Historical Super Bowl prop bet results
+                </p>
               </div>
             </div>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Link
+                href={isAdmin() ? "/admin/archive" : "/archive"}
+                className="px-5 py-3 text-gray-700 dark:text-gray-300 hover:text-[#0D4F3C] dark:hover:text-green-400 rounded-xl text-sm font-black uppercase tracking-wider border-4 border-gray-400 dark:border-gray-600 hover:border-[#0D4F3C] dark:hover:border-green-500 transition-all text-center"
+              >
+                All Archives
+              </Link>
+              <button
+                onClick={() => router.push(isAdmin() ? '/admin' : '/bets')}
+                className="px-5 py-3 text-gray-700 dark:text-gray-300 hover:text-[#0D4F3C] dark:hover:text-green-400 rounded-xl text-sm font-black uppercase tracking-wider border-4 border-gray-400 dark:border-gray-600 hover:border-[#0D4F3C] dark:hover:border-green-500 transition-all"
+              >
+                {isAdmin() ? 'Back to Admin' : 'Back to My Picks'}
+              </button>
+            </div>
+          </div>
         </div>
 
         {sortedSubmissions.length === 0 ? (
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border-4 border-[#0D4F3C] dark:border-green-600 p-8 text-center text-gray-700 dark:text-gray-300 font-bold">
-            <p>No submissions yet.</p>
+            <p>No submissions found for this archive.</p>
           </div>
         ) : (
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border-4 border-[#0D4F3C] dark:border-green-600 overflow-hidden">
@@ -366,7 +345,7 @@ export default function ViewPicksPage() {
               </table>
             </div>
             <div className="px-4 py-3 bg-gray-50 dark:bg-gray-700 border-t border-gray-200 dark:border-gray-600 text-sm text-gray-600 dark:text-gray-400">
-              Showing {sortedSubmissions.length} {sortedSubmissions.length === 1 ? 'user' : 'users'} and {bets.length} {bets.length === 1 ? 'bet' : 'bets'}
+              Showing {sortedSubmissions.length} {sortedSubmissions.length === 1 ? 'user' : 'users'} and {bets.length} {bets.length === 1 ? 'bet' : 'bets'} from {year}
             </div>
           </div>
         )}
@@ -388,4 +367,3 @@ export default function ViewPicksPage() {
     </div>
   );
 }
-

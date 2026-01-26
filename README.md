@@ -1,6 +1,6 @@
 # Family Bowl - Super Bowl Prop Bet Tracker
 
-A Next.js web application for tracking Super Bowl prop bets among family and friends. Users can submit their picks, view everyone's selections, and track scores once results are set.
+A Next.js web application for tracking Super Bowl prop bets among family and friends. Users can submit their picks, view everyone's selections (after locked), and track scores once results are locked.
 
 ## Features
 

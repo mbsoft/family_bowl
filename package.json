@@ -6,7 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "import-2025": "node scripts/import-2025-archive.js",
+    "import-2024": "node scripts/import-2024-archive.js",
+    "import-2023": "node scripts/import-2023-archive.js",
+    "import-2022": "node scripts/import-2022-archive.js",
+    "import-2021": "node scripts/import-2021-archive.js"
   },
   "dependencies": {
     "@libsql/client": "^0.17.0",

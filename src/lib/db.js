@@ -119,5 +119,49 @@ export async function initDatabase() {
       updated_at INTEGER
     )
   `);
+
+  // Archive tables for historical data
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS archive_years (
+      year INTEGER PRIMARY KEY,
+      created_at INTEGER
+    )
+  `);
+
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS archive_bets (
+      id TEXT PRIMARY KEY,
+      year INTEGER NOT NULL,
+      question TEXT NOT NULL,
+      type TEXT NOT NULL,
+      team_names TEXT,
+      display_order INTEGER DEFAULT 0,
+      FOREIGN KEY (year) REFERENCES archive_years(year) ON DELETE CASCADE
+    )
+  `);
+
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS archive_submissions (
+      id TEXT PRIMARY KEY,
+      year INTEGER NOT NULL,
+      username TEXT NOT NULL,
+      selections TEXT NOT NULL,
+      timestamp INTEGER,
+      FOREIGN KEY (year) REFERENCES archive_years(year) ON DELETE CASCADE,
+      UNIQUE(year, username)
+    )
+  `);
+
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS archive_results (
+      id TEXT PRIMARY KEY,
+      year INTEGER NOT NULL,
+      bet_id TEXT NOT NULL,
+      result TEXT NOT NULL,
+      FOREIGN KEY (year) REFERENCES archive_years(year) ON DELETE CASCADE,
+      FOREIGN KEY (bet_id) REFERENCES archive_bets(id) ON DELETE CASCADE,
+      UNIQUE(year, bet_id)
+    )
+  `);
 }
 

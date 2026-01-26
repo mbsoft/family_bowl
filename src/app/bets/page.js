@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { isAuthenticated, getCurrentUsername } from '../../lib/auth';
@@ -16,6 +16,7 @@ export default function BetsPage() {
   const router = useRouter();
   const [bets, setBets] = useState([]);
   const [selections, setSelections] = useState({});
+  const [originalSubmittedSelections, setOriginalSubmittedSelections] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -24,6 +25,7 @@ export default function BetsPage() {
   const [betTypes, setBetTypes] = useState([]);
   const { dialogState, showDialog, hideDialog } = useDialog();
   const { alertState, showAlert, hideAlert } = useAlert();
+  const hasLoadedRef = useRef(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -57,9 +59,38 @@ export default function BetsPage() {
         const betsToUse = loadedBets && loadedBets.length > 0 ? loadedBets : DEFAULT_BETS;
         setBets(betsToUse);
 
-        // Load existing submission if any
+        // Load from localStorage first (draft progress)
+        const draftKey = `family_bowl_draft_${currentUser}`;
+        const savedDraft = localStorage.getItem(draftKey);
+        let draftSelections = {};
+        
+        if (savedDraft) {
+          try {
+            draftSelections = JSON.parse(savedDraft);
+          } catch (e) {
+            console.error('Failed to parse draft from localStorage:', e);
+          }
+        }
+
+        // Load existing submission if any, but prefer draft if it exists
         if (existingSubmission && existingSubmission.selections) {
-          setSelections(existingSubmission.selections);
+          // Store the original submitted selections for comparison
+          setOriginalSubmittedSelections(existingSubmission.selections);
+          // Merge: use draft selections if they exist, otherwise use submitted selections
+          const finalSelections = Object.keys(draftSelections).length > 0 ? draftSelections : existingSubmission.selections;
+          setSelections(finalSelections);
+          // If we're using draft, mark as not submitted since it's been modified
+          if (Object.keys(draftSelections).length > 0) {
+            setSubmitted(false);
+          } else {
+            setSubmitted(true);
+          }
+        } else if (Object.keys(draftSelections).length > 0) {
+          // Only draft exists, use it
+          setSelections(draftSelections);
+          setOriginalSubmittedSelections(null);
+        } else {
+          setOriginalSubmittedSelections(null);
         }
       } catch (error) {
         console.error('Failed to load data:', error);
@@ -68,11 +99,30 @@ export default function BetsPage() {
         setBetTypes([]);
       } finally {
         setLoading(false);
+        // Mark that initial load is complete
+        hasLoadedRef.current = true;
       }
     };
 
     loadData();
   }, [router]);
+
+  // Auto-save to localStorage whenever selections change
+  useEffect(() => {
+    // Don't run during initial load - wait until data has been loaded
+    if (typeof window === 'undefined' || !username || picksLocked || !hasLoadedRef.current) {
+      return;
+    }
+
+    const draftKey = `family_bowl_draft_${username}`;
+    if (Object.keys(selections).length > 0) {
+      localStorage.setItem(draftKey, JSON.stringify(selections));
+    } else {
+      // Only clear draft if selections are empty AND we've finished loading
+      // This prevents clearing during initial mount
+      localStorage.removeItem(draftKey);
+    }
+  }, [selections, username, picksLocked]);
 
   const handleSelectionChange = (betId, value) => {
     if (picksLocked) {
@@ -86,6 +136,22 @@ export default function BetsPage() {
   };
 
   const allBetsAnswered = bets.length > 0 && bets.every(bet => selections[bet.id]);
+
+  // Check if current selections differ from original submitted selections
+  const hasChanges = originalSubmittedSelections ? (() => {
+    // Compare all bet IDs
+    const allBetIds = new Set([
+      ...Object.keys(selections),
+      ...Object.keys(originalSubmittedSelections)
+    ]);
+    
+    for (const betId of allBetIds) {
+      if (selections[betId] !== originalSubmittedSelections[betId]) {
+        return true;
+      }
+    }
+    return false;
+  })() : false;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -108,6 +174,13 @@ export default function BetsPage() {
       const success = await saveSubmission(submission);
       if (success) {
         setSubmitted(true);
+        // Update original submitted selections to match current
+        setOriginalSubmittedSelections({ ...selections });
+        // Clear draft from localStorage after successful submission
+        if (username) {
+          const draftKey = `family_bowl_draft_${username}`;
+          localStorage.removeItem(draftKey);
+        }
         // Scroll to top to show success message
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
@@ -142,6 +215,13 @@ export default function BetsPage() {
           // Clear local state
           setSelections({});
           setSubmitted(false);
+          setOriginalSubmittedSelections(null);
+          
+          // Clear draft from localStorage
+          if (username) {
+            const draftKey = `family_bowl_draft_${username}`;
+            localStorage.removeItem(draftKey);
+          }
           
           // Delete submission from database
           const success = await deleteSubmission(username);
@@ -189,21 +269,33 @@ export default function BetsPage() {
                   </p>
                 </div>
               </div>
-              <button
-                onClick={() => {
-                  if (typeof window !== 'undefined') {
-                    localStorage.removeItem('auth_user');
-                    router.push('/login');
-                  }
-                }}
-                className="flex-shrink-0 p-2 text-gray-600 dark:text-gray-400 hover:text-[#0D4F3C] dark:hover:text-green-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors border-2 border-transparent hover:border-[#0D4F3C] dark:hover:border-green-500"
-                title="Logout"
-                aria-label="Logout"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
-              </button>
+              <div className="flex items-center gap-2">
+                <Link
+                  href="/archive"
+                  className="flex-shrink-0 p-2 text-gray-600 dark:text-gray-400 hover:text-[#0D4F3C] dark:hover:text-green-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors border-2 border-transparent hover:border-[#0D4F3C] dark:hover:border-green-500"
+                  title="View Archive"
+                  aria-label="View Archive"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                  </svg>
+                </Link>
+                <button
+                  onClick={() => {
+                    if (typeof window !== 'undefined') {
+                      localStorage.removeItem('auth_user');
+                      router.push('/login');
+                    }
+                  }}
+                  className="flex-shrink-0 p-2 text-gray-600 dark:text-gray-400 hover:text-[#0D4F3C] dark:hover:text-green-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors border-2 border-transparent hover:border-[#0D4F3C] dark:hover:border-green-500"
+                  title="Logout"
+                  aria-label="Logout"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -296,9 +388,9 @@ export default function BetsPage() {
                     {picksLocked
                       ? 'Picks are Locked - Cannot Submit'
                       : submitting
-                      ? 'Saving...'
+                      ? (hasChanges ? 'Updating...' : 'Saving...')
                       : allBetsAnswered
-                      ? 'Submit Selections'
+                      ? (hasChanges ? 'Update Selections' : 'Submit Selections')
                       : `Please answer all ${bets.length} bets to submit`}
                   </button>
                   

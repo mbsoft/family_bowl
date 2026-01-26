@@ -410,3 +410,62 @@ export async function deleteBetResult(betId) {
     return false;
   }
 }
+
+/**
+ * Get all archive years
+ */
+export async function getArchiveYears() {
+  try {
+    return await dbCall('getArchiveYears');
+  } catch (e) {
+    console.error('Failed to get archive years:', e);
+    return [];
+  }
+}
+
+/**
+ * Get archive data for a specific year
+ */
+export async function getArchiveData(year) {
+  if (!year) {
+    return null;
+  }
+  try {
+    return await dbCall('getArchiveData', { year });
+  } catch (e) {
+    console.error('Failed to get archive data:', e);
+    return null;
+  }
+}
+
+/**
+ * Save archive data for a year
+ */
+export async function saveArchiveData(year, bets, submissions, results) {
+  if (!year || !bets || !submissions || !results) {
+    return false;
+  }
+  try {
+    await dbCall('saveArchiveData', { year, bets, submissions, results });
+    return true;
+  } catch (e) {
+    console.error('Failed to save archive data:', e);
+    return false;
+  }
+}
+
+/**
+ * Delete archive year
+ */
+export async function deleteArchiveYear(year) {
+  if (!year) {
+    return false;
+  }
+  try {
+    await dbCall('deleteArchiveYear', { year });
+    return true;
+  } catch (e) {
+    console.error('Failed to delete archive year:', e);
+    return false;
+  }
+}

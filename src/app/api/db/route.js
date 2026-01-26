@@ -484,6 +484,126 @@ export async function POST(request) {
         return NextResponse.json({ success: true });
       }
 
+      case 'getArchiveYears': {
+        const result = await db.execute('SELECT * FROM archive_years ORDER BY year DESC');
+        return NextResponse.json(result.rows.map(row => ({
+          year: row.year,
+          created_at: row.created_at
+        })));
+      }
+
+      case 'getArchiveData': {
+        const { year } = params;
+        if (!year) {
+          return NextResponse.json({ error: 'Year is required' }, { status: 400 });
+        }
+
+        const [betsResult, submissionsResult, resultsResult] = await Promise.all([
+          db.execute('SELECT * FROM archive_bets WHERE year = ? ORDER BY display_order ASC', [year]),
+          db.execute('SELECT * FROM archive_submissions WHERE year = ?', [year]),
+          db.execute('SELECT * FROM archive_results WHERE year = ?', [year])
+        ]);
+
+        const bets = betsResult.rows.map(row => ({
+          id: row.id,
+          question: row.question,
+          type: row.type,
+          teamNames: row.team_names ? JSON.parse(row.team_names) : undefined,
+          display_order: row.display_order
+        }));
+
+        const submissions = submissionsResult.rows.map(row => ({
+          username: row.username,
+          selections: JSON.parse(row.selections),
+          timestamp: row.timestamp * 1000
+        }));
+
+        const results = {};
+        resultsResult.rows.forEach(row => {
+          results[row.bet_id] = row.result;
+        });
+
+        return NextResponse.json({ bets, submissions, results });
+      }
+
+      case 'saveArchiveData': {
+        const { year, bets, submissions, results } = params;
+        if (!year || !bets || !submissions || !results) {
+          return NextResponse.json({ error: 'Year, bets, submissions, and results are required' }, { status: 400 });
+        }
+
+        try {
+          // Create year if it doesn't exist
+          await db.execute(`
+            INSERT OR IGNORE INTO archive_years (year, created_at)
+            VALUES (?, ?)
+          `, [year, Math.floor(Date.now() / 1000)]);
+
+          // Delete existing data for this year
+          await db.execute('DELETE FROM archive_results WHERE year = ?', [year]);
+          await db.execute('DELETE FROM archive_submissions WHERE year = ?', [year]);
+          await db.execute('DELETE FROM archive_bets WHERE year = ?', [year]);
+
+          // Insert bets
+          for (let i = 0; i < bets.length; i++) {
+            const bet = bets[i];
+            await db.execute(`
+              INSERT INTO archive_bets (id, year, question, type, team_names, display_order)
+              VALUES (?, ?, ?, ?, ?, ?)
+            `, [
+              bet.id,
+              year,
+              bet.question,
+              bet.type,
+              bet.teamNames ? JSON.stringify(bet.teamNames) : null,
+              i
+            ]);
+          }
+
+          // Insert submissions
+          for (const submission of submissions) {
+            await db.execute(`
+              INSERT INTO archive_submissions (id, year, username, selections, timestamp)
+              VALUES (?, ?, ?, ?, ?)
+            `, [
+              `archive-${year}-${submission.username}`,
+              year,
+              submission.username,
+              JSON.stringify(submission.selections),
+              Math.floor((submission.timestamp || Date.now()) / 1000)
+            ]);
+          }
+
+          // Insert results
+          for (const [betId, result] of Object.entries(results)) {
+            await db.execute(`
+              INSERT INTO archive_results (id, year, bet_id, result)
+              VALUES (?, ?, ?, ?)
+            `, [
+              `archive-result-${year}-${betId}`,
+              year,
+              betId,
+              result
+            ]);
+          }
+
+          return NextResponse.json({ success: true });
+        } catch (error) {
+          console.error('Error saving archive data:', error);
+          throw error;
+        }
+      }
+
+      case 'deleteArchiveYear': {
+        const { year } = params;
+        if (!year) {
+          return NextResponse.json({ error: 'Year is required' }, { status: 400 });
+        }
+        // Cascade delete will handle related records
+        await db.execute('DELETE FROM archive_years WHERE year = ?', [year]);
+        return NextResponse.json({ success: true });
+      }
+
       default:
         return NextResponse.json({ error: 'Unknown action' }, { status: 400 });
     }
