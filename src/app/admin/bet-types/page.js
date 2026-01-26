@@ -5,12 +5,17 @@ import { useRouter } from 'next/navigation';
 import ProtectedRoute from '../../../components/ProtectedRoute';
 import { getBetTypes, saveBetTypes } from '../../../lib/storage';
 import { DEFAULT_BET_TYPES } from '../../../utils/constants';
+import AlertDialog from '../../../components/AlertDialog';
+import Alert from '../../../components/Alert';
+import { useDialog, useAlert } from '../../../hooks/useDialog';
 
 export default function AdminBetTypesPage() {
   const router = useRouter();
   const [betTypes, setBetTypes] = useState([]);
   const [editingBetType, setEditingBetType] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const { dialogState, showDialog, hideDialog } = useDialog();
+  const { alertState, showAlert, hideAlert } = useAlert();
   const [formData, setFormData] = useState({
     id: '',
     label: '',
@@ -75,19 +80,27 @@ export default function AdminBetTypesPage() {
     setShowAddForm(true);
   };
 
-  const handleDelete = async (betTypeId) => {
-    if (confirm('Are you sure you want to delete this bet type? This may affect existing bets using this type.')) {
-      const updated = betTypes.filter(bt => bt.id !== betTypeId);
-      setBetTypes(updated);
-      try {
-        await saveBetTypes(updated);
-      } catch (error) {
-        console.error('Error deleting bet type:', error);
-        alert('Failed to delete bet type. Please try again.');
-        // Reload to restore state
-        loadBetTypes();
+  const handleDelete = (betTypeId) => {
+    showDialog({
+      title: 'Delete Bet Type',
+      message: 'Are you sure you want to delete this bet type? This may affect existing bets using this type.',
+      type: 'danger',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      onConfirm: async () => {
+        const updated = betTypes.filter(bt => bt.id !== betTypeId);
+        setBetTypes(updated);
+        try {
+          await saveBetTypes(updated);
+          showAlert('Bet type deleted successfully.', 'success');
+        } catch (error) {
+          console.error('Error deleting bet type:', error);
+          showAlert('Failed to delete bet type. Please try again.', 'error');
+          // Reload to restore state
+          loadBetTypes();
+        }
       }
-    }
+    });
   };
 
   const handleOptionChange = (index, value) => {
@@ -132,7 +145,7 @@ export default function AdminBetTypesPage() {
 
   const handleRemoveOption = (index) => {
     if (formData.options.length <= 2) {
-      alert('Bet types must have at least 2 options');
+      showAlert('Bet types must have at least 2 options', 'error');
       return;
     }
     const newOptions = formData.options.filter((_, i) => i !== index);
@@ -152,7 +165,7 @@ export default function AdminBetTypesPage() {
     
     // Validate
     if (!formData.id.trim() || !formData.label.trim()) {
-      alert('ID and Label are required');
+      showAlert('ID and Label are required', 'error');
       return;
     }
 
@@ -161,25 +174,25 @@ export default function AdminBetTypesPage() {
       const min = parseInt(formData.minValue, 10);
       const max = parseInt(formData.maxValue, 10);
       if (isNaN(min) || isNaN(max) || min >= max) {
-        alert('Min value must be less than max value');
+        showAlert('Min value must be less than max value', 'error');
         return;
       }
     } else {
       // Validate options for non-integer range types
       if (formData.options.length < 2) {
-        alert('At least 2 options are required');
+        showAlert('At least 2 options are required', 'error');
         return;
       }
 
       if (formData.options.some(opt => !opt.trim())) {
-        alert('All options must have values');
+        showAlert('All options must have values', 'error');
         return;
       }
     }
 
     // Check for duplicate ID (unless editing)
     if (!editingBetType && betTypes.some(bt => bt.id === formData.id)) {
-      alert('A bet type with this ID already exists');
+      showAlert('A bet type with this ID already exists', 'error');
       return;
     }
 
@@ -234,7 +247,7 @@ export default function AdminBetTypesPage() {
       });
     } catch (error) {
       console.error('Error saving bet type:', error);
-      alert('Failed to save bet type. Please try again.');
+      showAlert('Failed to save bet type. Please try again.', 'error');
       // Reload to restore state
       loadBetTypes();
     }
@@ -559,6 +572,25 @@ export default function AdminBetTypesPage() {
           </div>
         </div>
       </div>
+      
+      {/* Custom Dialogs */}
+      <AlertDialog
+        isOpen={dialogState.isOpen}
+        onClose={hideDialog}
+        onConfirm={dialogState.onConfirm}
+        title={dialogState.title}
+        message={dialogState.message}
+        confirmText={dialogState.confirmText}
+        cancelText={dialogState.cancelText}
+        type={dialogState.type}
+      />
+      <Alert
+        isOpen={alertState.isOpen}
+        onClose={hideAlert}
+        message={alertState.message}
+        type={alertState.type}
+        duration={alertState.duration}
+      />
     </ProtectedRoute>
   );
 }

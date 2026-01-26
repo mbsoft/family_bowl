@@ -4,6 +4,9 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import ProtectedRoute from '../../../components/ProtectedRoute';
 import { generateInvite, getInvites, deleteInvite } from '../../../lib/storage';
+import AlertDialog from '../../../components/AlertDialog';
+import Alert from '../../../components/Alert';
+import { useDialog, useAlert } from '../../../hooks/useDialog';
 
 export default function AdminInvitesPage() {
   const router = useRouter();
@@ -11,6 +14,8 @@ export default function AdminInvitesPage() {
   const [copiedToken, setCopiedToken] = useState(null);
   const [showGenerateForm, setShowGenerateForm] = useState(false);
   const [defaultUsername, setDefaultUsername] = useState('');
+  const { dialogState, showDialog, hideDialog } = useDialog();
+  const { alertState, showAlert, hideAlert } = useAlert();
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -37,12 +42,13 @@ export default function AdminInvitesPage() {
         await loadInvites();
         setShowGenerateForm(false);
         setDefaultUsername('');
+        showAlert('Invite generated successfully.', 'success');
       } else {
-        alert('Failed to generate invite');
+        showAlert('Failed to generate invite', 'error');
       }
     } catch (error) {
       console.error('Failed to generate invite:', error);
-      alert('Failed to generate invite. Please try again.');
+      showAlert('Failed to generate invite. Please try again.', 'error');
     }
   };
 
@@ -67,25 +73,33 @@ export default function AdminInvitesPage() {
     });
   };
 
-  const handleDeleteInvite = async (token) => {
+  const handleDeleteInvite = (token) => {
     const invite = Array.isArray(invites) ? invites.find(inv => inv.token === token) : null;
     const message = invite?.used
       ? `Are you sure you want to delete this used invite? This action cannot be undone.`
       : `Are you sure you want to delete this invite? The link will no longer work and cannot be recovered.`;
     
-    if (confirm(message)) {
-      try {
-        const success = await deleteInvite(token);
-        if (success) {
-          await loadInvites();
-        } else {
-          alert('Failed to delete invite');
+    showDialog({
+      title: 'Delete Invite',
+      message,
+      type: 'danger',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      onConfirm: async () => {
+        try {
+          const success = await deleteInvite(token);
+          if (success) {
+            await loadInvites();
+            showAlert('Invite deleted successfully.', 'success');
+          } else {
+            showAlert('Failed to delete invite', 'error');
+          }
+        } catch (error) {
+          console.error('Failed to delete invite:', error);
+          showAlert('Failed to delete invite. Please try again.', 'error');
         }
-      } catch (error) {
-        console.error('Failed to delete invite:', error);
-        alert('Failed to delete invite. Please try again.');
       }
-    }
+    });
   };
 
   // Sort invites: unused first, then by creation date (newest first)
@@ -282,6 +296,25 @@ export default function AdminInvitesPage() {
           </div>
         </div>
       </div>
+      
+      {/* Custom Dialogs */}
+      <AlertDialog
+        isOpen={dialogState.isOpen}
+        onClose={hideDialog}
+        onConfirm={dialogState.onConfirm}
+        title={dialogState.title}
+        message={dialogState.message}
+        confirmText={dialogState.confirmText}
+        cancelText={dialogState.cancelText}
+        type={dialogState.type}
+      />
+      <Alert
+        isOpen={alertState.isOpen}
+        onClose={hideAlert}
+        message={alertState.message}
+        type={alertState.type}
+        duration={alertState.duration}
+      />
     </ProtectedRoute>
   );
 }

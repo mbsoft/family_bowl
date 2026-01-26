@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation';
 import ProtectedRoute from '../../../components/ProtectedRoute';
 import { getUserCredentials, deleteUser } from '../../../lib/storage';
 import { getAllSubmissions } from '../../../lib/storage';
+import AlertDialog from '../../../components/AlertDialog';
+import Alert from '../../../components/Alert';
+import { useDialog, useAlert } from '../../../hooks/useDialog';
 
 export default function AdminUsersPage() {
   const router = useRouter();
@@ -12,6 +15,8 @@ export default function AdminUsersPage() {
   const [submissions, setSubmissions] = useState({});
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
+  const { dialogState, showDialog, hideDialog } = useDialog();
+  const { alertState, showAlert, hideAlert } = useAlert();
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -53,9 +58,9 @@ export default function AdminUsersPage() {
     }
   };
 
-  const handleDelete = async (username) => {
+  const handleDelete = (username) => {
     if (username.toLowerCase() === 'admin') {
-      alert('Cannot delete admin user');
+      showAlert('Cannot delete admin user', 'error');
       return;
     }
 
@@ -64,19 +69,27 @@ export default function AdminUsersPage() {
       ? `Are you sure you want to delete user "${username}"? This will also delete ${submissionCount} submission(s) associated with this user. This action cannot be undone.`
       : `Are you sure you want to delete user "${username}"? This action cannot be undone.`;
 
-    if (confirm(message)) {
-      try {
-        const success = await deleteUser(username);
-        if (success) {
-          await loadData();
-        } else {
-          alert('Failed to delete user. Please try again.');
+    showDialog({
+      title: 'Delete User',
+      message,
+      type: 'danger',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      onConfirm: async () => {
+        try {
+          const success = await deleteUser(username);
+          if (success) {
+            await loadData();
+            showAlert('User deleted successfully.', 'success');
+          } else {
+            showAlert('Failed to delete user. Please try again.', 'error');
+          }
+        } catch (error) {
+          console.error('Error deleting user:', error);
+          showAlert('Failed to delete user. Please try again.', 'error');
         }
-      } catch (error) {
-        console.error('Error deleting user:', error);
-        alert('Failed to delete user. Please try again.');
       }
-    }
+    });
   };
 
   const filteredUsers = Array.isArray(users)
@@ -202,6 +215,25 @@ export default function AdminUsersPage() {
           </div>
         </div>
       </div>
+      
+      {/* Custom Dialogs */}
+      <AlertDialog
+        isOpen={dialogState.isOpen}
+        onClose={hideDialog}
+        onConfirm={dialogState.onConfirm}
+        title={dialogState.title}
+        message={dialogState.message}
+        confirmText={dialogState.confirmText}
+        cancelText={dialogState.cancelText}
+        type={dialogState.type}
+      />
+      <Alert
+        isOpen={alertState.isOpen}
+        onClose={hideAlert}
+        message={alertState.message}
+        type={alertState.type}
+        duration={alertState.duration}
+      />
     </ProtectedRoute>
   );
 }

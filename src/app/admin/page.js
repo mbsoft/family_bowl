@@ -7,12 +7,17 @@ import { getBets } from '../../lib/storage';
 import { getAllSubmissions } from '../../lib/storage';
 import { arePicksLocked, setPicksLocked } from '../../lib/storage';
 import { getCurrentUsername } from '../../lib/auth';
+import AlertDialog from '../../components/AlertDialog';
+import Alert from '../../components/Alert';
+import { useDialog, useAlert } from '../../hooks/useDialog';
 
 export default function AdminDashboard() {
   const [bets, setBets] = useState([]);
   const [submissions, setSubmissions] = useState([]);
   const [username, setUsername] = useState(null);
   const [picksLocked, setPicksLockedState] = useState(false);
+  const { dialogState, showDialog, hideDialog } = useDialog();
+  const { alertState, showAlert, hideAlert } = useAlert();
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -33,20 +38,25 @@ export default function AdminDashboard() {
     loadData();
   }, []);
 
-  const handleToggleLock = async () => {
+  const handleToggleLock = () => {
     const newLockStatus = !picksLocked;
-    if (confirm(
-      newLockStatus
+    showDialog({
+      title: newLockStatus ? 'Lock All Picks' : 'Unlock All Picks',
+      message: newLockStatus
         ? 'Are you sure you want to LOCK all picks? Users will not be able to modify their submissions.'
-        : 'Are you sure you want to UNLOCK all picks? Users will be able to modify their submissions again.'
-    )) {
-      const success = await setPicksLocked(newLockStatus);
-      if (success) {
-        setPicksLockedState(newLockStatus);
-      } else {
-        alert('Failed to update lock status. Please try again.');
+        : 'Are you sure you want to UNLOCK all picks? Users will be able to modify their submissions again.',
+      type: 'warning',
+      confirmText: newLockStatus ? 'Lock' : 'Unlock',
+      cancelText: 'Cancel',
+      onConfirm: async () => {
+        const success = await setPicksLocked(newLockStatus);
+        if (success) {
+          setPicksLockedState(newLockStatus);
+        } else {
+          showAlert('Failed to update lock status. Please try again.', 'error');
+        }
       }
-    }
+    });
   };
 
   return (
@@ -260,6 +270,25 @@ export default function AdminDashboard() {
           </div>
         </div>
       </div>
+      
+      {/* Custom Dialogs */}
+      <AlertDialog
+        isOpen={dialogState.isOpen}
+        onClose={hideDialog}
+        onConfirm={dialogState.onConfirm}
+        title={dialogState.title}
+        message={dialogState.message}
+        confirmText={dialogState.confirmText}
+        cancelText={dialogState.cancelText}
+        type={dialogState.type}
+      />
+      <Alert
+        isOpen={alertState.isOpen}
+        onClose={hideAlert}
+        message={alertState.message}
+        type={alertState.type}
+        duration={alertState.duration}
+      />
     </ProtectedRoute>
   );
 }

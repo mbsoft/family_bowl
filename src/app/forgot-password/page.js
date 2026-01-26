@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { generatePasswordResetToken } from '../../lib/storage';
+import Alert from '../../components/Alert';
+import { useAlert } from '../../hooks/useDialog';
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
@@ -12,6 +14,7 @@ export default function ForgotPasswordPage() {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
   const [resetLink, setResetLink] = useState('');
+  const { alertState, showAlert, hideAlert } = useAlert();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -46,7 +49,7 @@ export default function ForgotPasswordPage() {
   const copyToClipboard = () => {
     if (resetLink) {
       navigator.clipboard.writeText(resetLink);
-      alert('Reset link copied to clipboard!');
+      showAlert('Reset link copied to clipboard!', 'success', 3000);
     }
   };
 
@@ -142,6 +145,15 @@ export default function ForgotPasswordPage() {
           </div>
         </div>
       </div>
+      
+      {/* Custom Alert */}
+      <Alert
+        isOpen={alertState.isOpen}
+        onClose={hideAlert}
+        message={alertState.message}
+        type={alertState.type}
+        duration={alertState.duration}
+      />
     </div>
   );
 }

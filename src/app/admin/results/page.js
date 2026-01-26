@@ -7,6 +7,9 @@ import { getBets, arePicksLocked } from '../../../lib/storage';
 import { getBetResults, saveBetResult, deleteBetResult } from '../../../lib/storage';
 import { getBetTypes } from '../../../lib/storage';
 import { getBetOptions, getBetOptionLabel } from '../../../utils/constants';
+import AlertDialog from '../../../components/AlertDialog';
+import Alert from '../../../components/Alert';
+import { useDialog, useAlert } from '../../../hooks/useDialog';
 
 export default function AdminResultsPage() {
   const router = useRouter();
@@ -16,6 +19,8 @@ export default function AdminResultsPage() {
   const [editingBetId, setEditingBetId] = useState(null);
   const [resultValue, setResultValue] = useState('');
   const [picksLocked, setPicksLocked] = useState(false);
+  const { dialogState, showDialog, hideDialog } = useDialog();
+  const { alertState, showAlert, hideAlert } = useAlert();
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -44,7 +49,7 @@ export default function AdminResultsPage() {
 
   const handleSaveResult = async (betId) => {
     if (!resultValue.trim()) {
-      alert('Please enter a result value');
+      showAlert('Please enter a result value', 'error');
       return;
     }
     
@@ -54,22 +59,31 @@ export default function AdminResultsPage() {
       setResults(updatedResults);
       setEditingBetId(null);
       setResultValue('');
+      showAlert('Result saved successfully.', 'success');
     } else {
-      alert('Failed to save result');
+      showAlert('Failed to save result', 'error');
     }
   };
 
-  const handleDeleteResult = async (betId) => {
-    if (confirm('Are you sure you want to delete this result?')) {
-      const success = await deleteBetResult(betId);
-      if (success) {
-        const updatedResults = { ...results };
-        delete updatedResults[betId];
-        setResults(updatedResults);
-      } else {
-        alert('Failed to delete result');
+  const handleDeleteResult = (betId) => {
+    showDialog({
+      title: 'Delete Result',
+      message: 'Are you sure you want to delete this result?',
+      type: 'danger',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      onConfirm: async () => {
+        const success = await deleteBetResult(betId);
+        if (success) {
+          const updatedResults = { ...results };
+          delete updatedResults[betId];
+          setResults(updatedResults);
+          showAlert('Result deleted successfully.', 'success');
+        } else {
+          showAlert('Failed to delete result', 'error');
+        }
       }
-    }
+    });
   };
 
   const handleCancel = () => {
@@ -262,6 +276,25 @@ export default function AdminResultsPage() {
           </div>
         </div>
       </div>
+      
+      {/* Custom Dialogs */}
+      <AlertDialog
+        isOpen={dialogState.isOpen}
+        onClose={hideDialog}
+        onConfirm={dialogState.onConfirm}
+        title={dialogState.title}
+        message={dialogState.message}
+        confirmText={dialogState.confirmText}
+        cancelText={dialogState.cancelText}
+        type={dialogState.type}
+      />
+      <Alert
+        isOpen={alertState.isOpen}
+        onClose={hideAlert}
+        message={alertState.message}
+        type={alertState.type}
+        duration={alertState.duration}
+      />
     </ProtectedRoute>
   );
 }

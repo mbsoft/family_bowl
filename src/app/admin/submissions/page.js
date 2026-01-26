@@ -6,6 +6,9 @@ import ProtectedRoute from '../../../components/ProtectedRoute';
 import { getAllSubmissions, saveSubmission, deleteSubmission } from '../../../lib/storage';
 import { getBets, getBetTypes } from '../../../lib/storage';
 import { getBetOptions, getBetOptionLabel } from '../../../utils/constants';
+import AlertDialog from '../../../components/AlertDialog';
+import Alert from '../../../components/Alert';
+import { useDialog, useAlert } from '../../../hooks/useDialog';
 
 export default function AdminSubmissionsPage() {
   const router = useRouter();
@@ -15,6 +18,8 @@ export default function AdminSubmissionsPage() {
   const [editingSubmission, setEditingSubmission] = useState(null);
   const [editingSelections, setEditingSelections] = useState({});
   const [searchTerm, setSearchTerm] = useState('');
+  const { dialogState, showDialog, hideDialog } = useDialog();
+  const { alertState, showAlert, hideAlert } = useAlert();
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -68,12 +73,13 @@ export default function AdminSubmissionsPage() {
         await loadData();
         setEditingSubmission(null);
         setEditingSelections({});
+        showAlert('Submission saved successfully.', 'success');
       } else {
-        alert('Failed to save submission. Please try again.');
+        showAlert('Failed to save submission. Please try again.', 'error');
       }
     } catch (error) {
       console.error('Error saving submission:', error);
-      alert('Failed to save submission. Please try again.');
+      showAlert('Failed to save submission. Please try again.', 'error');
     }
   };
 
@@ -82,25 +88,33 @@ export default function AdminSubmissionsPage() {
     setEditingSelections({});
   };
 
-  const handleDelete = async (submission) => {
-    if (confirm(`Are you sure you want to delete the submission for ${submission.username}? This action cannot be undone.`)) {
-      try {
-        const success = await deleteSubmission(submission.username);
-        if (success) {
-          await loadData();
-          // If we were editing this submission, cancel editing
-          if (editingSubmission?.username === submission.username) {
-            setEditingSubmission(null);
-            setEditingSelections({});
+  const handleDelete = (submission) => {
+    showDialog({
+      title: 'Delete Submission',
+      message: `Are you sure you want to delete the submission for ${submission.username}? This action cannot be undone.`,
+      type: 'danger',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      onConfirm: async () => {
+        try {
+          const success = await deleteSubmission(submission.username);
+          if (success) {
+            await loadData();
+            // If we were editing this submission, cancel editing
+            if (editingSubmission?.username === submission.username) {
+              setEditingSubmission(null);
+              setEditingSelections({});
+            }
+            showAlert('Submission deleted successfully.', 'success');
+          } else {
+            showAlert('Failed to delete submission. Please try again.', 'error');
           }
-        } else {
-          alert('Failed to delete submission. Please try again.');
+        } catch (error) {
+          console.error('Error deleting submission:', error);
+          showAlert('Failed to delete submission. Please try again.', 'error');
         }
-      } catch (error) {
-        console.error('Error deleting submission:', error);
-        alert('Failed to delete submission. Please try again.');
       }
-    }
+    });
   };
 
   const filteredSubmissions = Array.isArray(submissions) 
@@ -306,6 +320,25 @@ export default function AdminSubmissionsPage() {
           )}
         </div>
       </div>
+      
+      {/* Custom Dialogs */}
+      <AlertDialog
+        isOpen={dialogState.isOpen}
+        onClose={hideDialog}
+        onConfirm={dialogState.onConfirm}
+        title={dialogState.title}
+        message={dialogState.message}
+        confirmText={dialogState.confirmText}
+        cancelText={dialogState.cancelText}
+        type={dialogState.type}
+      />
+      <Alert
+        isOpen={alertState.isOpen}
+        onClose={hideAlert}
+        message={alertState.message}
+        type={alertState.type}
+        duration={alertState.duration}
+      />
     </ProtectedRoute>
   );
 }

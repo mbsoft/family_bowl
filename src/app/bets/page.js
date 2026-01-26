@@ -5,9 +5,12 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { isAuthenticated, getCurrentUsername } from '../../lib/auth';
 import { getBets, getBetTypes } from '../../lib/storage';
-import { getSubmission, saveSubmission, arePicksLocked } from '../../lib/storage';
+import { getSubmission, saveSubmission, deleteSubmission, arePicksLocked } from '../../lib/storage';
 import { DEFAULT_BETS } from '../../utils/constants';
 import BetInput from '../../components/BetInput';
+import AlertDialog from '../../components/AlertDialog';
+import Alert from '../../components/Alert';
+import { useDialog, useAlert } from '../../hooks/useDialog';
 
 export default function BetsPage() {
   const router = useRouter();
@@ -19,6 +22,8 @@ export default function BetsPage() {
   const [username, setUsername] = useState(null);
   const [picksLocked, setPicksLocked] = useState(false);
   const [betTypes, setBetTypes] = useState([]);
+  const { dialogState, showDialog, hideDialog } = useDialog();
+  const { alertState, showAlert, hideAlert } = useAlert();
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -106,14 +111,53 @@ export default function BetsPage() {
         // Scroll to top to show success message
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
-        alert('Failed to save submission. Please try again.');
+        showAlert('Failed to save submission. Please try again.', 'error');
       }
     } catch (error) {
       console.error('Failed to save submission:', error);
-      alert('An error occurred while saving. Please try again.');
+      showAlert('An error occurred while saving. Please try again.', 'error');
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleClearAll = () => {
+    if (picksLocked) {
+      return; // Don't allow clearing if locked
+    }
+    
+    if (!username) {
+      return;
+    }
+
+    // Show confirmation dialog
+    showDialog({
+      title: 'Clear All Entries',
+      message: 'Are you sure you want to clear all your entries? This action cannot be undone.',
+      type: 'danger',
+      confirmText: 'Clear All',
+      cancelText: 'Cancel',
+      onConfirm: async () => {
+        try {
+          // Clear local state
+          setSelections({});
+          setSubmitted(false);
+          
+          // Delete submission from database
+          const success = await deleteSubmission(username);
+          if (success) {
+            // Scroll to top to show confirmation
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            showAlert('All entries cleared successfully.', 'success');
+          } else {
+            showAlert('Failed to clear entries. Please try again.', 'error');
+          }
+        } catch (error) {
+          console.error('Failed to clear entries:', error);
+          showAlert('An error occurred while clearing entries. Please try again.', 'error');
+        }
+      }
+    });
   };
 
   if (loading) {
@@ -235,32 +279,63 @@ export default function BetsPage() {
                 })}
               </div>
 
-              <div className="mt-8 pt-6 border-t-4 border-gray-300 dark:border-gray-700">
-                <button
-                  type="submit"
-                  disabled={!allBetsAnswered || submitting || picksLocked}
-                  className={`
-                    w-full py-4 px-6 rounded-xl font-black uppercase tracking-wider transition-all shadow-lg
-                    ${
-                      allBetsAnswered && !submitting && !picksLocked
-                        ? 'bg-gradient-to-r from-[#0D4F3C] to-green-700 hover:from-green-700 hover:to-green-800 dark:from-green-600 dark:to-green-700 text-white hover:shadow-xl transform hover:scale-105'
-                        : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
-                    }
-                  `}
-                >
-                  {picksLocked
-                    ? 'Picks are Locked - Cannot Submit'
-                    : submitting
-                    ? 'Saving...'
-                    : allBetsAnswered
-                    ? 'Submit Selections'
-                    : `Please answer all ${bets.length} bets to submit`}
-                </button>
+              <div className="mt-8 pt-6 border-t-4 border-gray-300 dark:border-gray-700 space-y-4">
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <button
+                    type="submit"
+                    disabled={!allBetsAnswered || submitting || picksLocked}
+                    className={`
+                      flex-1 py-4 px-6 rounded-xl font-black uppercase tracking-wider transition-all shadow-lg
+                      ${
+                        allBetsAnswered && !submitting && !picksLocked
+                          ? 'bg-gradient-to-r from-[#0D4F3C] to-green-700 hover:from-green-700 hover:to-green-800 dark:from-green-600 dark:to-green-700 text-white hover:shadow-xl transform hover:scale-105'
+                          : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+                      }
+                    `}
+                  >
+                    {picksLocked
+                      ? 'Picks are Locked - Cannot Submit'
+                      : submitting
+                      ? 'Saving...'
+                      : allBetsAnswered
+                      ? 'Submit Selections'
+                      : `Please answer all ${bets.length} bets to submit`}
+                  </button>
+                  
+                  {Object.keys(selections).length > 0 && !picksLocked && (
+                    <button
+                      type="button"
+                      onClick={handleClearAll}
+                      className="px-6 py-4 bg-gradient-to-r from-[#EF4444] to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl font-black uppercase tracking-wider shadow-lg hover:shadow-xl transform hover:scale-105 transition-all whitespace-nowrap"
+                    >
+                      Clear All Entries
+                    </button>
+                  )}
+                </div>
               </div>
             </form>
           )}
         </div>
       </div>
+      
+      {/* Custom Dialogs */}
+      <AlertDialog
+        isOpen={dialogState.isOpen}
+        onClose={hideDialog}
+        onConfirm={dialogState.onConfirm}
+        title={dialogState.title}
+        message={dialogState.message}
+        confirmText={dialogState.confirmText}
+        cancelText={dialogState.cancelText}
+        type={dialogState.type}
+      />
+      <Alert
+        isOpen={alertState.isOpen}
+        onClose={hideAlert}
+        message={alertState.message}
+        type={alertState.type}
+        duration={alertState.duration}
+      />
     </div>
   );
 }

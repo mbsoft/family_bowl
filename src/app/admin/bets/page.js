@@ -6,6 +6,9 @@ import ProtectedRoute from '../../../components/ProtectedRoute';
 import { getBets, saveBets } from '../../../lib/storage';
 import { getBetTypes, saveBetTypes } from '../../../lib/storage';
 import { DEFAULT_BET_TYPES } from '../../../utils/constants';
+import AlertDialog from '../../../components/AlertDialog';
+import Alert from '../../../components/Alert';
+import { useDialog, useAlert } from '../../../hooks/useDialog';
 
 export default function AdminBetsPage() {
   const router = useRouter();
@@ -106,12 +109,20 @@ export default function AdminBetsPage() {
     setShowAddForm(true);
   };
 
-  const handleDelete = async (betId) => {
-    if (confirm('Are you sure you want to delete this bet?')) {
-      const updatedBets = bets.filter(bet => bet.id !== betId);
-      setBets(updatedBets);
-      await saveBets(updatedBets);
-    }
+  const handleDelete = (betId) => {
+    showDialog({
+      title: 'Delete Bet',
+      message: 'Are you sure you want to delete this bet?',
+      type: 'danger',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      onConfirm: async () => {
+        const updatedBets = bets.filter(bet => bet.id !== betId);
+        setBets(updatedBets);
+        await saveBets(updatedBets);
+        showAlert('Bet deleted successfully.', 'success');
+      }
+    });
   };
 
   const handleMoveUp = async (index) => {
@@ -162,15 +173,16 @@ export default function AdminBetsPage() {
       setBets(updatedBets);
       const success = await saveBets(updatedBets);
       if (!success) {
-        alert('Failed to save bet. Please try again.');
+        showAlert('Failed to save bet. Please try again.', 'error');
         // Revert the state change on failure
         const reloadedBets = await getBets();
         setBets(reloadedBets);
         return;
       }
+      showAlert('Bet saved successfully.', 'success');
     } catch (error) {
       console.error('Failed to save bet:', error);
-      alert('An error occurred while saving the bet. Please try again.');
+      showAlert('An error occurred while saving the bet. Please try again.', 'error');
       // Revert the state change on error
       const reloadedBets = await getBets();
       setBets(reloadedBets);
@@ -457,6 +469,25 @@ export default function AdminBetsPage() {
           </div>
         </div>
       </div>
+      
+      {/* Custom Dialogs */}
+      <AlertDialog
+        isOpen={dialogState.isOpen}
+        onClose={hideDialog}
+        onConfirm={dialogState.onConfirm}
+        title={dialogState.title}
+        message={dialogState.message}
+        confirmText={dialogState.confirmText}
+        cancelText={dialogState.cancelText}
+        type={dialogState.type}
+      />
+      <Alert
+        isOpen={alertState.isOpen}
+        onClose={hideAlert}
+        message={alertState.message}
+        type={alertState.type}
+        duration={alertState.duration}
+      />
     </ProtectedRoute>
   );
 }
