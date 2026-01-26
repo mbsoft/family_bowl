@@ -21,6 +21,8 @@ export default function AdminBetsPage() {
     type: '',
     teamNames: { option1: '', option2: '' }
   });
+  const { dialogState, showDialog, hideDialog } = useDialog();
+  const { alertState, showAlert, hideAlert } = useAlert();
 
   useEffect(() => {
     if (typeof window === 'undefined') {
