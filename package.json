@@ -12,12 +12,7 @@
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest --watch",
     "coverage:badge": "node scripts/generate-coverage-badge.js",
-    "coverage:update-readme": "node scripts/update-readme-coverage.js",
-    "import-2025": "node scripts/import-2025-archive.js",
-    "import-2024": "node scripts/import-2024-archive.js",
-    "import-2023": "node scripts/import-2023-archive.js",
-    "import-2022": "node scripts/import-2022-archive.js",
-    "import-2021": "node scripts/import-2021-archive.js"
+    "coverage:update-readme": "node scripts/update-readme-coverage.js"
   },
   "dependencies": {
     "@libsql/client": "^0.17.0",
@@ -25,8 +20,7 @@
     "bcryptjs": "^3.0.3",
     "next": "16.1.4",
     "react": "19.2.3",
-    "react-dom": "19.2.3",
-    "xlsx": "^0.18.5"
+    "react-dom": "19.2.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
