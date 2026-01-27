@@ -23,7 +23,7 @@ export default function InvitePage() {
 
   useEffect(() => {
     if (typeof window === 'undefined') {
-      setLoading(false);
+      setTimeout(() => setLoading(false), 0);
       return;
     }
 

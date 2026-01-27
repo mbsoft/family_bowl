@@ -269,7 +269,7 @@ export default function AdminResultsPage() {
 
           <div className="mt-6 p-4 bg-[#0D4F3C]/20 dark:bg-green-700/20 border-4 border-[#0D4F3C] dark:border-green-600 rounded-xl">
             <p className="text-sm text-gray-900 dark:text-white font-bold">
-              <strong className="uppercase">Note:</strong> Once you set a result for a bet, it will appear in the "View All Picks" table. 
+              <strong className="uppercase">Note:</strong> Once you set a result for a bet, it will appear in the &quot;View All Picks&quot; table. 
               Correct picks will be highlighted in green, and incorrect picks will be highlighted in red. 
               Users will see their point totals in the summary row.
             </p>

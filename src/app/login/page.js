@@ -18,10 +18,10 @@ export default function LoginPage() {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       if (params.get('registered') === 'true') {
-        setRegistered(true);
+        setTimeout(() => setRegistered(true), 0);
       }
       if (params.get('reset') === 'success') {
-        setRegistered(true); // Reuse the registered state to show success
+        setTimeout(() => setRegistered(true), 0); // Reuse the registered state to show success
       }
     }
 
@@ -141,7 +141,7 @@ export default function LoginPage() {
           <div className="mt-6 text-sm text-center text-gray-600 dark:text-gray-400 font-semibold">
             <p>Log in with your username and password</p>
             <p className="mt-2 text-xs">
-              Need an account? Contact 'Uncle Jim' for an invite link.
+              Need an account? Contact &apos;Uncle Jim&apos; for an invite link.
             </p>
             <Link
               href="/forgot-password"

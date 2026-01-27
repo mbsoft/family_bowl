@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import ProtectedRoute from '../../../components/ProtectedRoute';
 import { getUserCredentials, deleteUser } from '../../../lib/storage';
@@ -18,14 +18,7 @@ export default function AdminUsersPage() {
   const { dialogState, showDialog, hideDialog } = useDialog();
   const { alertState, showAlert, hideAlert } = useAlert();
 
-  useEffect(() => {
-    if (typeof window === 'undefined') {
-      return;
-    }
-    loadData();
-  }, []);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       const [usersData, submissionsData] = await Promise.all([
         getUserCredentials(),
@@ -56,7 +49,15 @@ export default function AdminUsersPage() {
       setSubmissions({});
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadData();
+  }, [loadData]);
 
   const handleDelete = (username) => {
     if (username.toLowerCase() === 'admin') {

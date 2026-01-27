@@ -333,7 +333,7 @@ export default function BetsPage() {
                 No bets have been configured yet.
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-500">
-                Please contact an 'Uncle Jim' to set up the prop bets.
+                Please contact an &apos;Uncle Jim&apos; to set up the prop bets.
               </p>
             </div>
           ) : (

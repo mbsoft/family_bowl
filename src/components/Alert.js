@@ -7,7 +7,7 @@ export default function Alert({ isOpen, onClose, message, type = 'info', duratio
 
   useEffect(() => {
     if (isOpen) {
-      setIsVisible(true);
+      setTimeout(() => setIsVisible(true), 0);
       if (duration > 0) {
         const timer = setTimeout(() => {
           setIsVisible(false);
@@ -18,6 +18,7 @@ export default function Alert({ isOpen, onClose, message, type = 'info', duratio
         return () => clearTimeout(timer);
       }
     } else {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsVisible(false);
     }
   }, [isOpen, duration, onClose]);

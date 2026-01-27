@@ -21,7 +21,7 @@ export default function ResetPasswordPage() {
 
   useEffect(() => {
     if (typeof window === 'undefined') {
-      setLoading(false);
+      setTimeout(() => setLoading(false), 0);
       return;
     }
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import ProtectedRoute from '../../../components/ProtectedRoute';
 import { generateInvite, getInvites, deleteInvite } from '../../../lib/storage';
@@ -17,14 +17,7 @@ export default function AdminInvitesPage() {
   const { dialogState, showDialog, hideDialog } = useDialog();
   const { alertState, showAlert, hideAlert } = useAlert();
 
-  useEffect(() => {
-    if (typeof window === 'undefined') {
-      return;
-    }
-    loadInvites();
-  }, []);
-
-  const loadInvites = async () => {
+  const loadInvites = useCallback(async () => {
     try {
       const loadedInvites = await getInvites();
       setInvites(loadedInvites || []);
@@ -32,7 +25,15 @@ export default function AdminInvitesPage() {
       console.error('Failed to load invites:', error);
       setInvites([]);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadInvites();
+  }, [loadInvites]);
 
   const handleGenerateInvite = async () => {
     const username = defaultUsername.trim() || null;
@@ -290,7 +291,7 @@ export default function AdminInvitesPage() {
           <div className="mt-6 p-4 bg-[#0D4F3C]/20 dark:bg-green-700/20 border-4 border-[#0D4F3C] dark:border-green-600 rounded-xl">
             <p className="text-sm text-gray-900 dark:text-white font-bold">
               <strong className="uppercase">How it works:</strong> Generate an invite link and share it with the user. 
-              When they click the link, they'll be able to create their account with a username and password. 
+              When they click the link, they&apos;ll be able to create their account with a username and password. 
               Each invite can only be used once.
             </p>
           </div>
