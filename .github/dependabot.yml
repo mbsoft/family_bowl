@@ -1,0 +1,49 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    groups:
+      # Group development dependencies together
+      development:
+        patterns:
+          - "@vitest/*"
+          - "@testing-library/*"
+          - "eslint*"
+          - "vitest"
+          - "jsdom"
+        update-types:
+          - "minor"
+          - "patch"
+      # Group React ecosystem updates
+      react:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "@vitejs/plugin-react"
+        update-types:
+          - "minor"
+          - "patch"
+      # Group styling dependencies
+      styling:
+        patterns:
+          - "tailwindcss"
+          - "@tailwindcss/*"
+          - "postcss*"
+    ignore:
+      # Ignore major version updates for core frameworks (review manually)
+      - dependency-name: "next"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-dom"
+        update-types: ["version-update:semver-major"]
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "automated"
