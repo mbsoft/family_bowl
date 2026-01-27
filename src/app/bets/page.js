@@ -272,13 +272,14 @@ export default function BetsPage() {
               <div className="flex items-center gap-2">
                 <Link
                   href="/archive"
-                  className="flex-shrink-0 p-2 text-gray-600 dark:text-gray-400 hover:text-[#0D4F3C] dark:hover:text-green-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors border-2 border-transparent hover:border-[#0D4F3C] dark:hover:border-green-500"
+                  className="flex-shrink-0 flex flex-col items-center p-2 text-gray-600 dark:text-gray-400 hover:text-[#0D4F3C] dark:hover:text-green-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors border-2 border-transparent hover:border-[#0D4F3C] dark:hover:border-green-500"
                   title="View Archive"
                   aria-label="View Archive"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 01-.982-3.172M9.497 14.25a7.454 7.454 0 00.981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 007.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M7.73 9.728a6.726 6.726 0 002.748 1.35m8.272-6.042V4.5c0 2.108-.966 3.99-2.48 5.228m2.48-5.228a46.65 46.65 0 012.916.52 6.003 6.003 0 01-5.395 4.972m0 0a6.726 6.726 0 01-2.749 1.35m0 0a6.772 6.772 0 01-3.044 0" />
                   </svg>
+                  <span className="text-xs font-semibold mt-1">Archives</span>
                 </Link>
                 <button
                   onClick={() => {

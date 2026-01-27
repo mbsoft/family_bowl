@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { isAuthenticated, isAdmin } from '../../lib/auth';
 import { getArchiveYears, getArchiveData } from '../../lib/storage';
+import SuperBowlLogo from '../../components/SuperBowlLogo';
+import { getSuperBowlNumber, toRomanNumeral } from '../../utils/superbowlLogos';
 
 export default function ArchiveIndexPage() {
   const router = useRouter();
@@ -154,11 +156,6 @@ export default function ArchiveIndexPage() {
         <div className="mb-8">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-4">
             <div className="flex items-center gap-3">
-              <img 
-                src="/logo.webp" 
-                alt="Family Bowl Logo" 
-                className="h-10 sm:h-12 w-auto flex-shrink-0 drop-shadow-lg"
-              />
               <div>
                 <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white mb-2 uppercase tracking-tight">
                   Archive
@@ -205,16 +202,21 @@ export default function ArchiveIndexPage() {
                       className="block p-6 bg-gradient-to-br from-[#0D4F3C] to-green-700 dark:from-green-600 dark:to-green-700 rounded-xl hover:from-green-700 hover:to-green-800 dark:hover:from-green-700 dark:hover:to-green-800 transition-all transform hover:scale-105 shadow-lg hover:shadow-xl"
                     >
                       <div className="text-center">
-                        <div className="text-4xl font-black text-white mb-2">
+                        <div className="flex justify-center mb-3">
+                          <SuperBowlLogo year={yearData.year} size={80} />
+                        </div>
+                        <div className="text-2xl font-black text-white mb-1">
                           {yearData.year}
                         </div>
                         <div className="text-sm text-green-100 dark:text-green-200 font-semibold">
                           Super Bowl {getSuperBowlNumber(yearData.year)}
                         </div>
                         {winner && (
-                          <div className="text-sm text-[#FFD700] dark:text-yellow-300 font-bold mt-2 flex items-center justify-center gap-1">
-                            <span>🏆</span>
-                            <span>{winner}</span>
+                          <div className="mt-4 mb-2">
+                            <div className="text-3xl mb-2">🏆</div>
+                            <div className="text-xl text-[#FFD700] dark:text-yellow-300 font-black uppercase tracking-wide">
+                              {winner}
+                            </div>
                           </div>
                         )}
                         <div className="text-xs text-green-200 dark:text-green-300 mt-2">
@@ -247,29 +249,3 @@ export default function ArchiveIndexPage() {
   );
 }
 
-/**
- * Get Super Bowl number from year
- * Super Bowl I was in 1967, so year - 1966 = Super Bowl number
- */
-function getSuperBowlNumber(year) {
-  const superBowlNumber = year - 1966;
-  return superBowlNumber > 0 ? `L${toRomanNumeral(superBowlNumber)}` : year;
-}
-
-/**
- * Convert number to Roman numeral
- */
-function toRomanNumeral(num) {
-  const values = [1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1];
-  const numerals = ['M', 'CM', 'D', 'CD', 'C', 'XC', 'L', 'XL', 'X', 'IX', 'V', 'IV', 'I'];
-  let result = '';
-  
-  for (let i = 0; i < values.length; i++) {
-    while (num >= values[i]) {
-      result += numerals[i];
-      num -= values[i];
-    }
-  }
-  
-  return result;
-}

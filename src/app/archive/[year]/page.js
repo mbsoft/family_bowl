@@ -7,6 +7,7 @@ import { isAuthenticated, isAdmin } from '../../../lib/auth';
 import { getArchiveData } from '../../../lib/storage';
 import { getBetTypes } from '../../../lib/storage';
 import { getBetOptionLabel } from '../../../utils/constants';
+import SuperBowlLogo from '../../../components/SuperBowlLogo';
 
 export default function ArchivePage() {
   const router = useRouter();
@@ -205,11 +206,7 @@ export default function ArchivePage() {
         <div className="mb-8">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-4">
             <div className="flex items-center gap-3">
-              <img 
-                src="/logo.webp" 
-                alt="Family Bowl Logo" 
-                className="h-10 sm:h-12 w-auto flex-shrink-0 drop-shadow-lg"
-              />
+              <SuperBowlLogo year={year} size={60} />
               <div>
                 <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white mb-2 uppercase tracking-tight">
                   {year} Archive

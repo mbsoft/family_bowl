@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import ProtectedRoute from '../../../components/ProtectedRoute';
 import { getArchiveYears, deleteArchiveYear, saveArchiveData } from '../../../lib/storage';
 import { getBets, getAllSubmissions, getBetResults } from '../../../lib/storage';
@@ -9,6 +10,8 @@ import { parseExcelArchive } from '../../../lib/importArchive';
 import AlertDialog from '../../../components/AlertDialog';
 import Alert from '../../../components/Alert';
 import { useDialog, useAlert } from '../../../hooks/useDialog';
+import SuperBowlLogo from '../../../components/SuperBowlLogo';
+import { getSuperBowlNumber, toRomanNumeral } from '../../../utils/superbowlLogos';
 
 export default function AdminArchivePage() {
   const router = useRouter();
@@ -294,20 +297,21 @@ export default function AdminArchivePage() {
                       className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border-2 border-gray-200 dark:border-gray-600"
                     >
                       <div className="flex items-center gap-4">
+                        <SuperBowlLogo year={yearData.year} size={50} />
                         <div>
                           <h3 className="text-lg font-black text-gray-900 dark:text-white">
-                            {yearData.year}
+                            {yearData.year} - Super Bowl {getSuperBowlNumber(yearData.year)}
                           </h3>
                           <p className="text-sm text-gray-600 dark:text-gray-400">
                             Archived {new Date(yearData.created_at * 1000).toLocaleDateString()}
                           </p>
                         </div>
-                        <a
+                        <Link
                           href={`/archive/${yearData.year}`}
                           className="px-4 py-2 bg-[#0D4F3C] dark:bg-green-600 text-white rounded-lg text-sm font-bold hover:bg-green-700 dark:hover:bg-green-700 transition-colors"
                         >
                           View Archive
-                        </a>
+                        </Link>
                       </div>
                       <button
                         onClick={() => handleDeleteYear(yearData.year)}
