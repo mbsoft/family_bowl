@@ -219,18 +219,6 @@ export default function AdminDashboard() {
             </Link>
 
             <Link
-              href="/admin/export"
-              className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border-4 border-[#0D4F3C] dark:border-green-600 p-6 hover:shadow-xl transition-all transform hover:scale-105"
-            >
-              <h2 className="text-xl font-black text-gray-900 dark:text-white mb-2 uppercase tracking-tight">
-                Export Data
-              </h2>
-              <p className="text-gray-700 dark:text-gray-300 font-semibold">
-                Download all submissions as an Excel spreadsheet.
-              </p>
-            </Link>
-
-            <Link
               href="/admin/results"
               className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border-4 border-[#0D4F3C] dark:border-green-600 p-6 hover:shadow-xl transition-all transform hover:scale-105"
             >

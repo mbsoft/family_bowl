@@ -6,7 +6,6 @@ import Link from 'next/link';
 import ProtectedRoute from '../../../components/ProtectedRoute';
 import { getArchiveYears, deleteArchiveYear, saveArchiveData } from '../../../lib/storage';
 import { getBets, getAllSubmissions, getBetResults } from '../../../lib/storage';
-import { parseExcelArchive } from '../../../lib/importArchive';
 import AlertDialog from '../../../components/AlertDialog';
 import Alert from '../../../components/Alert';
 import { useDialog, useAlert } from '../../../hooks/useDialog';
@@ -18,7 +17,6 @@ export default function AdminArchivePage() {
   const [archiveYears, setArchiveYears] = useState([]);
   const [loading, setLoading] = useState(true);
   const [archiving, setArchiving] = useState(false);
-  const [importing, setImporting] = useState(false);
   const { dialogState, showDialog, hideDialog } = useDialog();
   const { alertState, showAlert, hideAlert } = useAlert();
 
@@ -115,68 +113,6 @@ export default function AdminArchivePage() {
     });
   };
 
-  const handleImportExcel = () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.xlsx,.xls';
-    input.onchange = async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      setImporting(true);
-      try {
-        // Prompt for year
-        const yearInput = prompt('Enter the year for this archive (e.g., 2025):');
-        if (!yearInput) {
-          setImporting(false);
-          return;
-        }
-        
-        const year = parseInt(yearInput, 10);
-        if (isNaN(year) || year < 2000 || year > 2100) {
-          showAlert('Invalid year. Please enter a year between 2000 and 2100.', 'error');
-          setImporting(false);
-          return;
-        }
-
-        // Parse Excel file
-        const archiveData = await parseExcelArchive(file, year);
-        
-        if (!archiveData.bets || archiveData.bets.length === 0) {
-          showAlert('No bets found in Excel file.', 'error');
-          setImporting(false);
-          return;
-        }
-
-        if (!archiveData.submissions || archiveData.submissions.length === 0) {
-          showAlert('No submissions found in Excel file.', 'error');
-          setImporting(false);
-          return;
-        }
-
-        // Save archive data
-        const success = await saveArchiveData(
-          year,
-          archiveData.bets,
-          archiveData.submissions,
-          archiveData.results || {}
-        );
-
-        if (success) {
-          showAlert(`Successfully imported ${year} archive from Excel!`, 'success');
-          await loadArchiveYears();
-        } else {
-          showAlert('Failed to import archive. Please try again.', 'error');
-        }
-      } catch (error) {
-        console.error('Error importing Excel:', error);
-        showAlert(`Import error: ${error.message}`, 'error');
-      } finally {
-        setImporting(false);
-      }
-    };
-    input.click();
-  };
 
   if (loading) {
     return (
@@ -246,32 +182,6 @@ export default function AdminArchivePage() {
               </div>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border-4 border-[#0D4F3C] dark:border-green-600 p-6 sm:p-8">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div>
-                  <h2 className="text-xl font-black text-gray-900 dark:text-white mb-2 uppercase tracking-tight">
-                    Import from Excel
-                  </h2>
-                  <p className="text-sm text-gray-700 dark:text-gray-300">
-                    Import historical archive data from an Excel file. File should have headers: Username, Timestamp, then bet questions.
-                  </p>
-                </div>
-                <button
-                  onClick={handleImportExcel}
-                  disabled={importing}
-                  className={`
-                    px-6 py-3 rounded-xl font-black uppercase tracking-wider transition-all shadow-lg whitespace-nowrap
-                    ${
-                      importing
-                        ? 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
-                        : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white hover:shadow-xl transform hover:scale-105'
-                    }
-                  `}
-                >
-                  {importing ? 'Importing...' : 'Import Excel File'}
-                </button>
-              </div>
-            </div>
           </div>
 
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border-4 border-[#0D4F3C] dark:border-green-600 overflow-hidden">

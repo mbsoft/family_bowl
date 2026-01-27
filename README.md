@@ -3,7 +3,6 @@
 [![CI](https://github.com/mbsoft/family_bowl/actions/workflows/ci.yml/badge.svg)](https://github.com/mbsoft/family_bowl/actions/workflows/ci.yml)
 [![Coverage](https://img.shields.io/badge/coverage-31%25-orange)](https://github.com/mbsoft/family_bowl)
 
-> **Note:** Coverage badge options: See [COVERAGE_DISPLAY_OPTIONS.md](./COVERAGE_DISPLAY_OPTIONS.md) for different ways to display coverage, including automatic Codecov integration. Run `npm run coverage:badge` to generate an updated badge.
 
 A Next.js web application for tracking Super Bowl prop bets among family and friends. Users can submit their picks, view everyone's selections (after locked), and track scores once results are locked.
 
