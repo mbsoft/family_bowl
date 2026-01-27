@@ -250,7 +250,7 @@ export default function AdminDashboard() {
                 View All Picks
               </h2>
               <p className="text-gray-700 dark:text-gray-300 font-semibold">
-                View everyone's picks in a table format with scoring.
+                View everyone&apos;s picks in a table format with scoring.
               </p>
             </Link>
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import ProtectedRoute from '../../../components/ProtectedRoute';
 import { getAllSubmissions, saveSubmission, deleteSubmission } from '../../../lib/storage';
@@ -21,14 +21,7 @@ export default function AdminSubmissionsPage() {
   const { dialogState, showDialog, hideDialog } = useDialog();
   const { alertState, showAlert, hideAlert } = useAlert();
 
-  useEffect(() => {
-    if (typeof window === 'undefined') {
-      return;
-    }
-    loadData();
-  }, []);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       const [submissionsData, betsData, betTypesData] = await Promise.all([
         getAllSubmissions(),
@@ -44,7 +37,15 @@ export default function AdminSubmissionsPage() {
       setBets([]);
       setBetTypes([]);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadData();
+  }, [loadData]);
 
   const handleEdit = (submission) => {
     setEditingSubmission(submission);

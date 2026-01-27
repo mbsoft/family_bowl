@@ -226,7 +226,7 @@ export default function AdminArchivePage() {
                     Archive Current Year
                   </h2>
                   <p className="text-sm text-gray-700 dark:text-gray-300">
-                    Create a permanent archive of the current year's bets, submissions, and results.
+                    Create a permanent archive of the current year&apos;s bets, submissions, and results.
                   </p>
                 </div>
                 <button
@@ -286,7 +286,7 @@ export default function AdminArchivePage() {
                     No archived years yet.
                   </p>
                   <p className="text-sm text-gray-500 dark:text-gray-500">
-                    Archive the current year to preserve this year's results.
+                    Archive the current year to preserve this year&apos;s results.
                   </p>
                 </div>
               ) : (

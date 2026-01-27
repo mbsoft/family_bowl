@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import ProtectedRoute from '../../../components/ProtectedRoute';
 import { getBetTypes, saveBetTypes } from '../../../lib/storage';
@@ -27,14 +27,7 @@ export default function AdminBetTypesPage() {
     maxValue: 100
   });
 
-  useEffect(() => {
-    if (typeof window === 'undefined') {
-      return;
-    }
-    loadBetTypes();
-  }, []);
-
-  const loadBetTypes = async () => {
+  const loadBetTypes = useCallback(async () => {
     try {
       let loaded = await getBetTypes();
       if (!loaded || loaded.length === 0) {
@@ -48,7 +41,15 @@ export default function AdminBetTypesPage() {
       // Fallback to defaults on error
       setBetTypes(DEFAULT_BET_TYPES);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadBetTypes();
+  }, [loadBetTypes]);
 
   const handleAdd = () => {
     setFormData({
@@ -498,7 +499,7 @@ export default function AdminBetTypesPage() {
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border-4 border-[#0D4F3C] dark:border-green-600 overflow-hidden">
             {betTypes.length === 0 ? (
               <div className="p-8 text-center text-gray-700 dark:text-gray-300 font-bold">
-                No bet types configured. Click "Add New Bet Type" to get started.
+                No bet types configured. Click &quot;Add New Bet Type&quot; to get started.
               </div>
             ) : (
               <div className="divide-y-4 divide-gray-300 dark:divide-gray-700">

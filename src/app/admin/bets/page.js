@@ -369,7 +369,7 @@ export default function AdminBetsPage() {
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border-4 border-[#0D4F3C] dark:border-green-600 overflow-hidden">
             {bets.length === 0 ? (
               <div className="p-8 text-center text-gray-700 dark:text-gray-300 font-bold">
-                No bets configured. Click "Add New Bet" to get started.
+                No bets configured. Click &quot;Add New Bet&quot; to get started.
               </div>
             ) : (
               <div className="divide-y-4 divide-gray-300 dark:divide-gray-700">
