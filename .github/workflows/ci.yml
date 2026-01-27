@@ -70,6 +70,16 @@ jobs:
       - name: Run tests with coverage
         run: npm run test:coverage
 
+      - name: Update README with coverage badge
+        run: node scripts/update-readme-coverage.js
+
+      - name: Commit updated README
+        if: github.ref == 'refs/heads/main'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git diff --quiet README.md || (git add README.md && git commit -m "chore: update coverage badge [skip ci]" && git push)
+
       - name: Upload coverage reports
         uses: codecov/codecov-action@v4
         with:

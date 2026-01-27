@@ -1,7 +1,7 @@
 # Family Bowl - Super Bowl Prop Bet Tracker
 
 [![CI](https://github.com/mbsoft/family_bowl/actions/workflows/ci.yml/badge.svg)](https://github.com/mbsoft/family_bowl/actions/workflows/ci.yml)
-[![Coverage](https://img.shields.io/badge/coverage-31%25-orange)](https://github.com/mbsoft/family_bowl)
+[![Coverage](https://img.shields.io/badge/coverage-97%25-brightgreen)](https://github.com/mbsoft/family_bowl)
 
 
 A Next.js web application for tracking Super Bowl prop bets among family and friends. Users can submit their picks, view everyone's selections (after locked), and track scores once results are locked.

@@ -12,6 +12,7 @@
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest --watch",
     "coverage:badge": "node scripts/generate-coverage-badge.js",
+    "coverage:update-readme": "node scripts/update-readme-coverage.js",
     "import-2025": "node scripts/import-2025-archive.js",
     "import-2024": "node scripts/import-2024-archive.js",
     "import-2023": "node scripts/import-2023-archive.js",
