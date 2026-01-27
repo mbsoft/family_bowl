@@ -5,11 +5,12 @@
 /**
  * Get Super Bowl number from year
  * Super Bowl I was in 1967, so year - 1966 = Super Bowl number
+ * Returns the full Roman numeral (e.g., "LV" for Super Bowl 55)
  */
 export function getSuperBowlNumber(year) {
   const superBowlNumber = year - 1966;
   if (superBowlNumber <= 0) return null;
-  return `L${toRomanNumeral(superBowlNumber)}`;
+  return toRomanNumeral(superBowlNumber);
 }
 
 /**

@@ -1,6 +1,9 @@
 # Family Bowl - Super Bowl Prop Bet Tracker
 
 [![CI](https://github.com/mbsoft/family_bowl/actions/workflows/ci.yml/badge.svg)](https://github.com/mbsoft/family_bowl/actions/workflows/ci.yml)
+[![Coverage](https://img.shields.io/badge/coverage-31%25-orange)](https://github.com/mbsoft/family_bowl)
+
+> **Note:** Coverage badge options: See [COVERAGE_DISPLAY_OPTIONS.md](./COVERAGE_DISPLAY_OPTIONS.md) for different ways to display coverage, including automatic Codecov integration. Run `npm run coverage:badge` to generate an updated badge.
 
 A Next.js web application for tracking Super Bowl prop bets among family and friends. Users can submit their picks, view everyone's selections (after locked), and track scores once results are locked.
 
@@ -45,6 +48,7 @@ A Next.js web application for tracking Super Bowl prop bets among family and fri
 - **Database**: Turso (libSQL/SQLite)
 - **Analytics**: Vercel Analytics
 - **Export**: XLSX library for Excel exports
+- **Testing**: Vitest with React Testing Library
 
 ## Prerequisites
 
@@ -200,6 +204,36 @@ Once picks are locked:
 - Points displayed in summary row at top of table
 - Correct picks highlighted in light green
 - Incorrect picks highlighted in light red
+
+## Testing
+
+This project uses [Vitest](https://vitest.dev/) for unit and integration testing.
+
+### Running Tests
+
+```bash
+# Run tests in watch mode
+npm test
+
+# Run tests once
+npm test -- --run
+
+# Run tests with coverage
+npm run test:coverage
+
+# Run tests with UI
+npm run test:ui
+```
+
+### Test Coverage
+
+Coverage reports are generated in the `coverage/` directory. The project maintains minimum coverage thresholds:
+- Lines: 60%
+- Functions: 60%
+- Branches: 60%
+- Statements: 60%
+
+See [VITEST_SETUP.md](./VITEST_SETUP.md) for detailed testing documentation.
 
 ## Contributing
 

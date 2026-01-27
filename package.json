@@ -7,6 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest --watch",
+    "coverage:badge": "node scripts/generate-coverage-badge.js",
     "import-2025": "node scripts/import-2025-archive.js",
     "import-2024": "node scripts/import-2024-archive.js",
     "import-2023": "node scripts/import-2023-archive.js",
@@ -24,8 +29,16 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/react": "^16.0.1",
+    "@testing-library/user-event": "^14.5.2",
+    "@vitejs/plugin-react": "^4.3.1",
+    "@vitest/coverage-v8": "^2.1.8",
+    "@vitest/ui": "^2.1.8",
     "eslint": "^9",
     "eslint-config-next": "16.1.4",
-    "tailwindcss": "^4"
+    "jsdom": "^25.0.1",
+    "tailwindcss": "^4",
+    "vitest": "^2.1.8"
   }
 }

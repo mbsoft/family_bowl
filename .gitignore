@@ -3,15 +3,11 @@
 # dependencies
 /node_modules
 /.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
+.pnp.js
 
 # testing
 /coverage
+*.lcov
 
 # next.js
 /.next/
@@ -28,10 +24,10 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# local env files
+.env*.local
+.env
 
 # vercel
 .vercel
@@ -39,12 +35,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-scripts/import-2021-archive.js
-scripts/import-2022-archive.js
-scripts/import-2023-archive.js
-scripts/import-2024-archive.js
-scripts/import-2025-archive.js
-SuperBowl-PropBet-Tracker.xlsx
-Untitled spreadsheet (1).xlsx
-Untitled spreadsheet (2).xlsx
-Untitled spreadsheet (3).xlsx
+
+# vitest
+.vitest
