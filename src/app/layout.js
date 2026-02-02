@@ -16,6 +16,9 @@ const geistMono = Geist_Mono({
 export const metadata = {
   title: process.env.NEXT_PUBLIC_APP_TITLE || "Super Bowl Prop Bet Tracker",
   description: "Track and manage Super Bowl prop bet selections",
+  other: {
+    "impact-site-verification": "e36f94ae-9bbd-43e6-ba3e-67fb130c5e2b",
+  },
 };
 
 export default function RootLayout({ children }) {
