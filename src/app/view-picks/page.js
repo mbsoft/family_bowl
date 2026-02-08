@@ -105,11 +105,18 @@ export default function ViewPicksPage() {
     );
   }
 
-  // Sort submissions alphabetically by username
+  // Sort submissions by points (high to low), then alphabetically by username
   const sortedSubmissions = Array.isArray(submissions)
-    ? [...submissions].sort((a, b) =>
-        a.username.localeCompare(b.username)
-      )
+    ? [...submissions].sort((a, b) => {
+        const pointsA = calculatePoints(a.username);
+        const pointsB = calculatePoints(b.username);
+        // Sort by points descending (high to low)
+        if (pointsB !== pointsA) {
+          return pointsB - pointsA;
+        }
+        // If points are equal, sort alphabetically
+        return a.username.localeCompare(b.username);
+      })
     : [];
 
   // Calculate points for each user
