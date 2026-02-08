@@ -105,20 +105,6 @@ export default function ViewPicksPage() {
     );
   }
 
-  // Sort submissions by points (high to low), then alphabetically by username
-  const sortedSubmissions = Array.isArray(submissions)
-    ? [...submissions].sort((a, b) => {
-        const pointsA = calculatePoints(a.username);
-        const pointsB = calculatePoints(b.username);
-        // Sort by points descending (high to low)
-        if (pointsB !== pointsA) {
-          return pointsB - pointsA;
-        }
-        // If points are equal, sort alphabetically
-        return a.username.localeCompare(b.username);
-      })
-    : [];
-
   // Calculate points for each user
   const calculatePoints = (username) => {
     let points = 0;
@@ -137,6 +123,20 @@ export default function ViewPicksPage() {
     });
     return points;
   };
+
+  // Sort submissions by points (high to low), then alphabetically by username
+  const sortedSubmissions = Array.isArray(submissions)
+    ? [...submissions].sort((a, b) => {
+        const pointsA = calculatePoints(a.username);
+        const pointsB = calculatePoints(b.username);
+        // Sort by points descending (high to low)
+        if (pointsB !== pointsA) {
+          return pointsB - pointsA;
+        }
+        // If points are equal, sort alphabetically
+        return a.username.localeCompare(b.username);
+      })
+    : [];
 
   // Check if a user's pick is correct
   const isCorrect = (betId, username) => {
